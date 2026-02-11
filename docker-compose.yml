@@ -1,0 +1,91 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: ipo_postgres
+    environment:
+      POSTGRES_USER: ipo_user
+      POSTGRES_PASSWORD: ipo_password
+      POSTGRES_DB: ipo_platform
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ipo_user -d ipo_platform"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ipo_network
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: ipo_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    networks:
+      - ipo_network
+
+  # MongoDB for Prospectus Storage
+  mongodb:
+    image: mongo:7
+    container_name: ipo_mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ipo_network
+
+  # FastAPI Backend (Uncomment after Phase 1 setup)
+  # backend:
+  #   build:
+  #     context: ./backend
+  #     dockerfile: Dockerfile
+  #   container_name: ipo_backend
+  #   ports:
+  #     - "8000:8000"
+  #   environment:
+  #     - DATABASE_URL=postgresql://ipo_user:ipo_password@postgres:5432/ipo_platform
+  #     - REDIS_URL=redis://redis:6379/0
+  #     - MONGODB_URL=mongodb://mongodb:27017
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #     redis:
+  #       condition: service_healthy
+  #     mongodb:
+  #       condition: service_healthy
+  #   volumes:
+  #     - ./backend:/app
+  #   networks:
+  #     - ipo_network
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  mongodb_data:
+    driver: local
+
+networks:
+  ipo_network:
+    driver: bridge

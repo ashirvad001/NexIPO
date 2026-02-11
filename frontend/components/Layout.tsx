@@ -1,0 +1,129 @@
+// components/Layout.tsx
+import React from 'react';
+import Head from 'next/head';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
+
+interface LayoutProps {
+  children: React.ReactNode;
+  title?: string;
+  description?: string;
+}
+
+const Layout: React.FC<LayoutProps> = ({ 
+  children, 
+  title = 'NexIPO',
+  description = 'ML-Powered IPO Analysis and Risk Assessment'
+}) => {
+  const router = useRouter();
+
+  const navItems = [
+    { label: 'Dashboard', href: '/' },
+    { label: 'Active IPOs', href: '/active' },
+    { label: 'Upcoming', href: '/upcoming' },
+    { label: 'All IPOs', href: '/ipos' },
+  ];
+
+  return (
+    <>
+      <Head>
+        <title>{title}</title>
+        <meta name="description" content={description} />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
+
+      <div className="min-h-screen flex flex-col">
+        {/* Header */}
+        <header className="bg-white shadow-sm sticky top-0 z-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between items-center h-16">
+              {/* Logo */}
+              <Link href="/" className="flex items-center space-x-3">
+                <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-700 rounded-lg flex items-center justify-center">
+                  <span className="text-white font-bold text-lg">I</span>
+                </div>
+                <span className="text-xl font-bold text-gray-900">
+                  NexIPO
+                </span>
+              </Link>
+
+              {/* Navigation */}
+              <nav className="hidden md:flex space-x-8">
+                {navItems.map((item) => {
+                  const isActive = router.pathname === item.href;
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                        isActive
+                          ? 'text-primary-600 bg-primary-50'
+                          : 'text-gray-700 hover:text-primary-600 hover:bg-gray-50'
+                      }`}
+                    >
+                      {item.label}
+                    </Link>
+                  );
+                })}
+              </nav>
+
+              {/* Mobile menu button */}
+              <div className="md:hidden">
+                <button className="text-gray-700 hover:text-primary-600">
+                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* Main Content */}
+        <main className="flex-1">
+          {children}
+        </main>
+
+        {/* Footer */}
+        <footer className="bg-white border-t border-gray-200 mt-12">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div>
+                <h3 className="text-sm font-semibold text-gray-900 mb-3">About</h3>
+                <p className="text-sm text-gray-600">
+                  ML-powered platform for IPO analysis and risk assessment. Built for placements and final year projects.
+                </p>
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-gray-900 mb-3">Quick Links</h3>
+                <ul className="space-y-2">
+                  {navItems.map((item) => (
+                    <li key={item.href}>
+                      <Link href={item.href} className="text-sm text-gray-600 hover:text-primary-600">
+                        {item.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-gray-900 mb-3">Technology</h3>
+                <p className="text-sm text-gray-600">
+                  Next.js • TypeScript • FastAPI • PostgreSQL • Machine Learning
+                </p>
+              </div>
+            </div>
+            <div className="mt-8 pt-8 border-t border-gray-200">
+              <p className="text-sm text-gray-500 text-center">
+                © {new Date().getFullYear()} NexIPO. Built for educational purposes.
+              </p>
+            </div>
+          </div>
+        </footer>
+      </div>
+    </>
+  );
+};
+
+export default Layout;
