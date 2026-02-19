@@ -70,6 +70,7 @@ export interface IPO {
   
   // Additional
   prospectus_url: string | null;
+  prospectus_file_id: string | null;
   lot_size: number | null;
   min_investment: number | null;
   description: string | null;

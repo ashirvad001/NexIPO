@@ -7,7 +7,7 @@ import time
 
 from app.core.config import get_settings
 from app.db.database import Base, engine
-from app.api.routes import ipos
+from app.api.routes import ipos, files, ml
 
 settings = get_settings()
 
@@ -20,6 +20,16 @@ async def lifespan(app: FastAPI):
     # Startup
     print("🚀 Starting NexIPO...")
     print(f"📊 Environment: {'Development' if settings.DEBUG else 'Production'}")
+    
+    # Initialize NLTK
+    try:
+        import nltk
+        nltk.download('punkt', quiet=True)
+        nltk.download('stopwords', quiet=True)
+        nltk.download('wordnet', quiet=True)
+        print("✅ NLTK initialized")
+    except Exception as e:
+        print(f"⚠️ NLTK initialization warning: {e}")
     
     # Initialize database
     try:
@@ -48,9 +58,27 @@ app = FastAPI(
 
 
 # CORS middleware configuration
+import json
+
+# Ensure BACKEND_CORS_ORIGINS is a list (env may supply a JSON string or comma-separated)
+origins = settings.BACKEND_CORS_ORIGINS
+if isinstance(origins, str):
+    try:
+        parsed = json.loads(origins)
+        if isinstance(parsed, str):
+            origins = [parsed]
+        elif isinstance(parsed, list):
+            origins = parsed
+        else:
+            origins = [str(parsed)]
+    except Exception:
+        origins = [o.strip() for o in origins.split(',') if o.strip()]
+if not isinstance(origins, list):
+    origins = [origins]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.BACKEND_CORS_ORIGINS,
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -110,6 +138,8 @@ async def root():
 
 # Include routers
 app.include_router(ipos.router, prefix=settings.API_V1_PREFIX)
+app.include_router(files.router, prefix=settings.API_V1_PREFIX)
+app.include_router(ml.router, prefix=settings.API_V1_PREFIX)
 
 
 if __name__ == "__main__":

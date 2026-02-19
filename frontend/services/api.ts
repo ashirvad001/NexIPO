@@ -91,6 +91,56 @@ class APIService {
   async deleteIPO(id: number): Promise<void> {
     await this.client.delete(`/ipos/${id}`);
   }
+
+  // Upload prospectus PDF
+  async uploadProspectus(ipoId: number, file: File): Promise<any> {
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    const response = await this.client.post(
+      `/files/upload/prospectus/${ipoId}`,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
+    return response.data;
+  }
+
+  // Get prospectus data
+  async getProspectus(ipoId: number, includeFullText: boolean = false): Promise<any> {
+    const response = await this.client.get(`/files/prospectus/${ipoId}`, {
+      params: { include_full_text: includeFullText },
+    });
+    return response.data;
+  }
+
+  // Get prospectus sections
+  async getProspectusSections(ipoId: number): Promise<any> {
+    const response = await this.client.get(`/files/prospectus/${ipoId}/sections`);
+    return response.data;
+  }
+
+  // Get specific prospectus section
+  async getProspectusSection(ipoId: number, sectionName: string): Promise<any> {
+    const response = await this.client.get(
+      `/files/prospectus/${ipoId}/section/${sectionName}`
+    );
+    return response.data;
+  }
+
+  // Delete prospectus
+  async deleteProspectus(ipoId: number): Promise<void> {
+    await this.client.delete(`/files/prospectus/${ipoId}`);
+  }
+
+  // Get file metadata
+  async getFileMetadata(fileId: string): Promise<any> {
+    const response = await this.client.get(`/files/metadata/${fileId}`);
+    return response.data;
+  }
 }
 
 // Export singleton instance
