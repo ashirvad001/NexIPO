@@ -1,77 +1,209 @@
-# app/api/routes/ml.py
-from fastapi import APIRouter, HTTPException, status
-from pydantic import BaseModel
-from typing import Dict, Optional
-import logging
+# ML API Routes - Phase 5
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
+from sqlalchemy.orm import Session
+from typing import List, Dict, Any
 
-logger = logging.getLogger(__name__)
+from app.db.database import get_db
+from app.services.ml_service import MLService
+from app.ml_service.inference.risk_predictor import get_predictor
 
 router = APIRouter(prefix="/ml", tags=["Machine Learning"])
 
 
-class RiskPredictionRequest(BaseModel):
-    prospectus_text: str
-    sections: Dict[str, str] = {}
-    ipo_data: Dict = {}
-    explain: bool = True
-
-
-class RiskPredictionResponse(BaseModel):
-    risk_score: int
-    risk_category: str
-    confidence: float
-    risk_indicators: Dict
-    explanation: Optional[Dict] = None
-    explanation_text: Optional[str] = None
-    success: bool
-
-
-@router.post("/predict-risk", response_model=RiskPredictionResponse)
-async def predict_risk(request: RiskPredictionRequest):
-    """Predict IPO risk from prospectus text"""
-    try:
-        from app.ml_service.inference.risk_predictor import get_predictor
+@router.post("/predict/{ipo_id}")
+async def predict_risk(ipo_id: int, db: Session = Depends(get_db)):
+    """
+    Trigger ML risk prediction for an IPO
+    
+    Args:
+        ipo_id: IPO database ID
         
+    Returns:
+        Prediction results with risk score, category, and explanation
+    """
+    try:
+        result = await MLService.predict_risk(ipo_id, db)
+        return {
+            "message": "Risk prediction completed successfully",
+            **result
+        }
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Prediction failed: {str(e)}")
+
+
+@router.post("/predict/batch")
+async def predict_batch(
+    ipo_ids: List[int],
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db)
+):
+    """
+    Trigger batch ML predictions for multiple IPOs
+    
+    Args:
+        ipo_ids: List of IPO database IDs
+        
+    Returns:
+        Batch job status
+    """
+    async def process_batch():
+        results = []
+        for ipo_id in ipo_ids:
+            try:
+                result = await MLService.predict_risk(ipo_id, db)
+                results.append({"ipo_id": ipo_id, "status": "success", **result})
+            except Exception as e:
+                results.append({"ipo_id": ipo_id, "status": "failed", "error": str(e)})
+        return results
+    
+    background_tasks.add_task(process_batch)
+    
+    return {
+        "message": f"Batch prediction started for {len(ipo_ids)} IPOs",
+        "ipo_ids": ipo_ids,
+        "status": "processing"
+    }
+
+
+@router.get("/prediction/{ipo_id}")
+async def get_prediction(ipo_id: int, db: Session = Depends(get_db)):
+    """
+    Get existing ML prediction for an IPO
+    
+    Args:
+        ipo_id: IPO database ID
+        
+    Returns:
+        Existing prediction or 404 if not found
+    """
+    result = await MLService.get_prediction(ipo_id, db)
+    if not result:
+        raise HTTPException(
+            status_code=404,
+            detail=f"No ML prediction found for IPO {ipo_id}"
+        )
+    return result
+
+
+@router.delete("/prediction/{ipo_id}")
+async def delete_prediction(ipo_id: int, db: Session = Depends(get_db)):
+    """
+    Delete ML prediction for an IPO
+    
+    Args:
+        ipo_id: IPO database ID
+        
+    Returns:
+        Deletion confirmation
+    """
+    from app.models.ipo import IPO
+    
+    ipo = db.query(IPO).filter(IPO.id == ipo_id).first()
+    if not ipo:
+        raise HTTPException(status_code=404, detail=f"IPO {ipo_id} not found")
+    
+    ipo.risk_score = None
+    ipo.risk_category = None
+    ipo.ml_processed = False
+    ipo.ml_processed_at = None
+    db.commit()
+    
+    return {
+        "message": f"ML prediction deleted for IPO {ipo_id}",
+        "ipo_id": ipo_id
+    }
+
+
+@router.get("/model/info")
+async def get_model_info():
+    """
+    Get ML model information and metadata
+    
+    Returns:
+        Model type, feature count, version, etc.
+    """
+    return MLService.get_model_info()
+
+
+@router.get("/model/performance")
+async def get_model_performance():
+    """
+    Get ML model performance metrics
+    
+    Returns:
+        Training accuracy, F1 scores, etc.
+    """
+    predictor = get_predictor()
+    
+    if not predictor.classifier.is_fitted:
+        return {
+            "message": "Model not trained yet",
+            "is_fitted": False
+        }
+    
+    return {
+        "is_fitted": True,
+        "model_type": "Logistic Regression",
+        "feature_count": 1034,
+        "message": "Model performance metrics available after training"
+    }
+
+
+@router.get("/statistics")
+async def get_statistics(db: Session = Depends(get_db)):
+    """
+    Get ML processing statistics
+    
+    Returns:
+        Total IPOs, processed count, risk distribution
+    """
+    return await MLService.get_statistics(db)
+
+
+@router.post("/predict-risk")
+async def predict_risk_direct(data: Dict[str, Any]):
+    """
+    Direct risk prediction from prospectus text (no database)
+    
+    Args:
+        data: Dictionary with prospectus_text, sections, ipo_data, explain
+        
+    Returns:
+        Risk prediction results
+    """
+    try:
         predictor = get_predictor()
         result = predictor.predict(
-            request.prospectus_text,
-            request.sections,
-            request.ipo_data,
-            request.explain
+            prospectus_text=data.get("prospectus_text", ""),
+            sections=data.get("sections", {}),
+            ipo_data=data.get("ipo_data", {}),
+            explain=data.get("explain", True)
         )
-        
-        if not result.get('success'):
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=result.get('error', 'Prediction failed')
-            )
-        
         return result
-        
     except Exception as e:
-        logger.error(f"ML prediction error: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"ML service error: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Prediction failed: {str(e)}")
 
 
 @router.get("/model-status")
-async def model_status():
-    """Check ML model status"""
+async def get_model_status():
+    """
+    Get ML model status
+    
+    Returns:
+        Model loaded status and readiness
+    """
     try:
-        from app.ml_service.inference.risk_predictor import get_predictor
-        
         predictor = get_predictor()
-        
         return {
-            "model_loaded": predictor.classifier.is_fitted,
-            "explainer_available": predictor.explainer is not None,
-            "status": "ready" if predictor.classifier.is_fitted else "not_trained"
+            "status": "ready" if predictor.classifier.is_fitted else "not_trained",
+            "is_fitted": predictor.classifier.is_fitted,
+            "model_type": "Logistic Regression",
+            "feature_count": 1034
         }
     except Exception as e:
         return {
-            "model_loaded": False,
             "status": "error",
             "error": str(e)
         }

@@ -39,6 +39,17 @@ async def lifespan(app: FastAPI):
         print(f"❌ Database initialization failed: {e}")
         raise
     
+    # Load ML model
+    try:
+        from app.ml_service.inference.risk_predictor import get_predictor
+        predictor = get_predictor()
+        if predictor.classifier.is_fitted:
+            print("✅ ML model loaded successfully")
+        else:
+            print("⚠️ ML model not trained yet")
+    except Exception as e:
+        print(f"⚠️ ML model loading warning: {e}")
+    
     yield
     
     # Shutdown
@@ -76,13 +87,24 @@ if isinstance(origins, str):
 if not isinstance(origins, list):
     origins = [origins]
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+if settings.DEBUG:
+    # In development allow all origins to avoid CORS friction.
+    # When using wildcard origins, do not allow credentials (browsers block wildcard + credentials).
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=False,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+else:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=origins,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
 
 # Request timing middleware

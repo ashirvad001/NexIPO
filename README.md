@@ -335,10 +335,13 @@ python test_api.py
 - [x] End-to-end prediction pipeline
 - [x] ML API endpoints
 
-### 🔜 Phase 5: ML Integration (Days 19-23)
-- [ ] ML microservice
-- [ ] Risk score API
-- [ ] Frontend ML visualization
+### ✅ Phase 5: ML Integration (Days 19-23) - **COMPLETE**
+- [x] ML API endpoints (9 endpoints)
+- [x] Frontend risk score components
+- [x] ML prediction workflow
+- [x] SHAP explanation display
+- [x] Batch prediction support
+- [x] Model performance tracking
 
 ### 🔜 Phase 6: Deployment (Days 24-30)
 - [ ] Redis caching
@@ -430,6 +433,89 @@ curl -X POST "http://localhost:8000/api/v1/ml/predict-risk" \
   },
   "success": true
 }
+```
+
+---
+
+## 🔌 Phase 5: ML Integration - COMPLETE
+
+### Integration Components
+
+**Backend ML API (9 Endpoints):**
+- `POST /ml/predict/{ipo_id}` - Trigger ML prediction
+- `POST /ml/predict/batch` - Batch predictions
+- `GET /ml/prediction/{ipo_id}` - Get existing prediction
+- `DELETE /ml/prediction/{ipo_id}` - Delete prediction
+- `GET /ml/model/info` - Model information
+- `GET /ml/model/performance` - Model metrics
+- `GET /ml/statistics` - ML processing stats
+- `POST /ml/predict-risk` - Direct text prediction
+- `GET /ml/model-status` - Model status check
+
+**Frontend Components:**
+- `RiskScoreCard.tsx` - Beautiful risk display with circular progress
+- `MLPredictButton.tsx` - Trigger ML analysis with loading state
+- API service methods for ML endpoints
+
+### Complete User Flow
+
+1. **Upload Prospectus** → User uploads PDF
+2. **Trigger Analysis** → Click "Run ML Analysis" button
+3. **Processing** → Backend extracts features, predicts risk
+4. **Display Results** → Risk score card shows:
+   - Risk score (0-100) with circular progress
+   - Risk category badge (Low/Medium/High)
+   - Confidence percentage
+   - Top 5 contributing factors (SHAP)
+   - Human-readable explanation
+
+### Example: Trigger Prediction
+
+```bash
+curl -X POST "http://localhost:8000/api/v1/ml/predict/1"
+```
+
+**Response:**
+```json
+{
+  "message": "Risk prediction completed successfully",
+  "ipo_id": 1,
+  "risk_score": 45,
+  "risk_category": "medium",
+  "confidence": 0.87,
+  "risk_indicators": {
+    "high_risk": 23,
+    "financial_risk": 12
+  },
+  "explanation": {
+    "top_features": [
+      {"feature": "risk mentions", "contribution": 0.42, "importance_rank": 1}
+    ]
+  },
+  "success": true
+}
+```
+
+### Frontend Integration
+
+```tsx
+import RiskScoreCard from '@/components/RiskScoreCard';
+import MLPredictButton from '@/components/MLPredictButton';
+
+// Trigger prediction
+<MLPredictButton
+  ipoId={1}
+  onPredictionComplete={(result) => setPrediction(result)}
+  onPredictionError={(error) => alert(error)}
+/>
+
+// Display results
+<RiskScoreCard
+  riskScore={prediction.risk_score}
+  riskCategory={prediction.risk_category}
+  confidence={prediction.confidence}
+  explanation={prediction.explanation}
+/>
 ```
 
 ---

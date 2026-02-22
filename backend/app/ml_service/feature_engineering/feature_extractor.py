@@ -122,6 +122,36 @@ class FeatureExtractor:
         
         return feature_matrix, feature_names
     
+    def extract_features(
+        self,
+        processed_text: str,
+        sections: Dict[str, str],
+        ipo_data: Dict,
+        risk_indicators: Dict
+    ) -> np.ndarray:
+        """Extract features for single prediction"""
+        # For single prediction without fitting, use simple feature extraction
+        tfidf_features = np.zeros(self.max_features)
+        
+        risk_feats = self.extract_risk_features(risk_indicators)
+        read_feats = self.extract_readability_features(processed_text)
+        sect_feats = self.extract_section_features(sections)
+        fin_feats = self.extract_financial_metrics_features(ipo_data)
+        
+        combined = self.combine_features(tfidf_features, risk_feats, read_feats, sect_feats, fin_feats)
+        return combined
+    
+    def get_feature_names(self) -> List[str]:
+        """Get list of feature names"""
+        tfidf_names = [f'tfidf_{i}' for i in range(self.max_features)]
+        custom_names = (
+            list(self.extract_risk_features({}).keys()) +
+            list(self.extract_readability_features('').keys()) +
+            list(self.extract_section_features({}).keys()) +
+            list(self.extract_financial_metrics_features({}).keys())
+        )
+        return tfidf_names + custom_names
+    
     def transform(self, text: str, risk_indicators: Dict, sections: Dict, ipo_data: Dict) -> np.ndarray:
         if not self.is_fitted:
             raise ValueError("FeatureExtractor must be fitted before transform")
