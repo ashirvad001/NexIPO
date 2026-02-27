@@ -10,6 +10,9 @@ const apiClient: AxiosInstance = axios.create({
   },
 });
 
+// Authentication token (managed via apiService.setAuthToken)
+let authToken: string | null = null;
+
 async function requestWithRetry<T>(fn: () => Promise<T>, retries = 2, delayMs = 300) {
   let lastErr: any;
   for (let i = 0; i <= retries; i++) {
@@ -24,6 +27,67 @@ async function requestWithRetry<T>(fn: () => Promise<T>, retries = 2, delayMs = 
 }
 
 export const apiService = {
+  // Authentication token management
+  authToken,
+
+  setAuthToken(token: string | null) {
+    authToken = token;
+    if (token) {
+      apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    } else {
+      delete apiClient.defaults.headers.common['Authorization'];
+    }
+  },
+
+  // Auth endpoints
+  async signup(data: {
+    email: string;
+    username: string;
+    password: string;
+    confirm_password: string;
+    full_name?: string;
+  }) {
+    const response = await apiClient.post('/auth/signup', data);
+    return response.data;
+  },
+
+  async login(email: string, password: string) {
+    const response = await apiClient.post('/auth/login/json', { email, password });
+    return response.data;
+  },
+
+  async getCurrentUser() {
+    const response = await apiClient.get('/auth/me');
+    return response.data;
+  },
+
+  async updateProfile(data: {
+    full_name?: string;
+    phone?: string;
+    company?: string;
+    designation?: string;
+    bio?: string;
+  }) {
+    const response = await apiClient.put('/auth/me', data);
+    return response.data;
+  },
+
+  async changePassword(data: {
+    current_password: string;
+    new_password: string;
+    confirm_new_password: string;
+  }) {
+    await apiClient.post('/auth/change-password', data);
+  },
+
+  async logout() {
+    await apiClient.post('/auth/logout');
+  },
+
+  async deleteAccount() {
+    await apiClient.delete('/auth/me');
+  },
+
   // IPO endpoints
   async getIPOs(params?: any) {
     const response = await apiClient.get('/ipos/', { params });
@@ -38,6 +102,11 @@ export const apiService = {
   // Backwards-compatible alias used by some pages/components
   async getIPOById(id: number) {
     const response = await apiClient.get(`/ipos/${id}`);
+    return response.data;
+  },
+
+  async getIPOAnalysis(id: number) {
+    const response = await apiClient.get(`/ipos/${id}/analysis`);
     return response.data;
   },
 
@@ -95,7 +164,7 @@ export const apiService = {
     const response = await apiClient.get('/ml/model-status');
     return response.data;
   },
-  
+
   // Get active IPOs with retry
   async getActiveIPOs() {
     return requestWithRetry(async () => {

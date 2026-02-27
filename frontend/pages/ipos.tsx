@@ -57,7 +57,7 @@ export default function AllIPOs() {
   };
 
   return (
-    <Layout title="All IPOs - IPO Intelligence Platform">
+    <Layout title="All IPOs - NexIPO">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
@@ -169,21 +169,19 @@ export default function AllIPOs() {
           <div className="mt-4 flex gap-2">
             <button
               onClick={() => setSortOrder('asc')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                sortOrder === 'asc'
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${sortOrder === 'asc'
                   ? 'bg-primary-600 text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
+                }`}
             >
               Ascending
             </button>
             <button
               onClick={() => setSortOrder('desc')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                sortOrder === 'desc'
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${sortOrder === 'desc'
                   ? 'bg-primary-600 text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
+                }`}
             >
               Descending
             </button>
@@ -254,11 +252,10 @@ export default function AllIPOs() {
                         <button
                           key={pageNum}
                           onClick={() => setPage(pageNum)}
-                          className={`px-4 py-2 rounded-lg text-sm font-medium ${
-                            page === pageNum
+                          className={`px-4 py-2 rounded-lg text-sm font-medium ${page === pageNum
                               ? 'bg-primary-600 text-white'
                               : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
-                          }`}
+                            }`}
                         >
                           {pageNum}
                         </button>

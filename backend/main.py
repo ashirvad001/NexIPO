@@ -3,11 +3,13 @@ from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
+import asyncio
+import logging
 import time
 
 from app.core.config import get_settings
 from app.db.database import Base, engine
-from app.api.routes import ipos, files, ml
+from app.api.routes import ipos, files, ml, auth
 
 settings = get_settings()
 
@@ -50,9 +52,14 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         print(f"⚠️ ML model loading warning: {e}")
     
+    # Start background IPO sync
+    sync_task = asyncio.create_task(_background_ipo_sync())
+    print("🔄 Background IPO sync started")
+    
     yield
     
     # Shutdown
+    sync_task.cancel()
     print("👋 Shutting down NexIPO...")
 
 
@@ -162,6 +169,54 @@ async def root():
 app.include_router(ipos.router, prefix=settings.API_V1_PREFIX)
 app.include_router(files.router, prefix=settings.API_V1_PREFIX)
 app.include_router(ml.router, prefix=settings.API_V1_PREFIX)
+app.include_router(auth.router, prefix=settings.API_V1_PREFIX)
+
+
+async def _background_ipo_sync():
+    """
+    Background task that syncs IPO data on startup and every 30 minutes.
+    """
+    logger = logging.getLogger("ipo_sync")
+    from app.db.database import SessionLocal
+    from app.services.ipo_scraper import sync_ipos
+
+    # Initial sync after a short delay to let the app fully start
+    await asyncio.sleep(5)
+    try:
+        db = SessionLocal()
+        try:
+            summary = await sync_ipos(db)
+            logger.info(
+                f"✅ Initial IPO sync: {summary['added']} added, "
+                f"{summary['updated']} updated, {summary['total_scraped']} scraped"
+            )
+            print(
+                f"✅ Initial IPO sync: {summary['added']} added, "
+                f"{summary['updated']} updated, {summary['total_scraped']} scraped"
+            )
+        finally:
+            db.close()
+    except Exception as e:
+        logger.error(f"❌ Initial IPO sync failed: {e}")
+        print(f"❌ Initial IPO sync failed: {e}")
+
+    # Periodic sync every 30 minutes
+    while True:
+        try:
+            await asyncio.sleep(30 * 60)  # 30 minutes
+            db = SessionLocal()
+            try:
+                summary = await sync_ipos(db)
+                logger.info(
+                    f"🔄 Periodic IPO sync: {summary['added']} added, "
+                    f"{summary['updated']} updated"
+                )
+            finally:
+                db.close()
+        except asyncio.CancelledError:
+            break
+        except Exception as e:
+            logger.error(f"❌ Periodic IPO sync failed: {e}")
 
 
 if __name__ == "__main__":

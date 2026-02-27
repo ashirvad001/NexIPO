@@ -14,8 +14,45 @@ from app.schemas.ipo import (
     IPOType
 )
 from app.services.ipo_service import IPOService
+from app.services.ipo_scraper import sync_ipos
+from app.services.ipo_analyzer import analyze_ipo
 
 router = APIRouter(prefix="/ipos", tags=["IPOs"])
+
+
+@router.post("/sync", tags=["IPOs"])
+async def sync_ipo_data(db: Session = Depends(get_db)):
+    """
+    Trigger a manual sync of real-time Indian IPO data.
+    Scrapes live data from Investorgain.com and upserts into the database.
+    """
+    try:
+        summary = await sync_ipos(db)
+        return {
+            "status": "success",
+            "message": f"Synced {summary['total_scraped']} IPOs: "
+                       f"{summary['added']} added, {summary['updated']} updated",
+            "details": summary,
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Sync failed: {str(e)}",
+        )
+
+
+@router.get("/{ipo_id}/analysis", tags=["IPOs"])
+def get_ipo_analysis(ipo_id: int, db: Session = Depends(get_db)):
+    """
+    Get a data-driven analysis of an IPO including Pros, Cons, Risks, and Verdict.
+    """
+    analysis = analyze_ipo(db, ipo_id)
+    if not analysis:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="IPO not found",
+        )
+    return analysis
 
 
 @router.post("/", response_model=IPOResponse, status_code=status.HTTP_201_CREATED)

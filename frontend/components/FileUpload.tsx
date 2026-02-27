@@ -88,9 +88,13 @@ const FileUpload: React.FC<FileUploadProps> = ({
           setSelectedFile(null);
           onUploadSuccess?.(result);
         } else {
-          const error = JSON.parse(xhr.responseText);
           setUploading(false);
-          onUploadError?.(error.detail || 'Upload failed');
+          try {
+            const error = JSON.parse(xhr.responseText);
+            onUploadError?.(error.detail || 'Upload failed');
+          } catch {
+            onUploadError?.(`Upload failed with status ${xhr.status}`);
+          }
         }
       });
 
