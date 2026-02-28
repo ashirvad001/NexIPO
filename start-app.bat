@@ -1,49 +1,91 @@
 @echo off
-echo ========================================
-echo NexIPO
-echo Complete Application Startup
-echo ========================================
+title NexIPO - Application Launcher
+color 0B
+
+echo.
+echo  =============================================
+echo       NexIPO - ML-Powered IPO Platform
+echo       Complete Application Startup
+echo  =============================================
 echo.
 
-REM Check if Python is installed
+REM ── Resolve project root (wherever this .bat lives) ──
+set "ROOT=%~dp0"
+
+REM ── Pre-flight checks ──
+echo  [CHECK] Verifying prerequisites...
+echo.
+
 python --version >nul 2>&1
 if %errorlevel% neq 0 (
-    echo ERROR: Python is not installed or not in PATH
+    echo  [ERROR] Python is not installed or not in PATH.
+    echo          Download from https://www.python.org/downloads/
     pause
     exit /b 1
 )
+echo  [OK] Python found
 
-REM Check if Node.js is installed
 node --version >nul 2>&1
 if %errorlevel% neq 0 (
-    echo ERROR: Node.js is not installed or not in PATH
+    echo  [ERROR] Node.js is not installed or not in PATH.
+    echo          Download from https://nodejs.org/
     pause
     exit /b 1
 )
+echo  [OK] Node.js found
 
-echo [Step 1] Starting Backend API...
+REM ── Check backend virtual environment ──
+if not exist "%ROOT%backend\venv\Scripts\activate.bat" (
+    echo  [ERROR] Backend virtual environment not found.
+    echo          Run:  cd backend ^&^& python -m venv venv
+    pause
+    exit /b 1
+)
+echo  [OK] Backend venv found
+
+REM ── Check frontend node_modules ──
+if not exist "%ROOT%frontend\node_modules" (
+    echo  [INFO] Frontend dependencies not installed. Installing...
+    start "Installing Frontend Deps" /wait cmd /c "cd /d "%ROOT%frontend" && npm install"
+)
+echo  [OK] Frontend dependencies ready
 echo.
-start "IPO Backend API" cmd /k "cd backend && python -m uvicorn main:app --reload --host 0.0.0.0 --port 8000"
+
+REM ── Step 1: Start Backend ──
+echo  [STEP 1/2] Starting Backend API (FastAPI + Uvicorn)...
+start "NexIPO Backend" cmd /k "cd /d "%ROOT%backend" && call venv\Scripts\activate.bat && python main.py"
+echo           Waiting for backend to initialize...
+timeout /t 6 /nobreak >nul
+echo           Backend should be live at http://localhost:8000
+echo.
+
+REM ── Step 2: Start Frontend ──
+echo  [STEP 2/2] Starting Frontend (Next.js)...
+start "NexIPO Frontend" cmd /k "cd /d "%ROOT%frontend" && npm run dev"
+echo           Waiting for frontend to compile...
 timeout /t 5 /nobreak >nul
+echo           Frontend should be live at http://localhost:3000
+echo.
 
-echo [Step 2] Starting Frontend...
-echo.
-start "IPO Frontend" cmd /k "cd frontend && npm install && npm run dev"
+REM ── Open browser ──
+echo  [INFO] Opening application in your browser...
+timeout /t 3 /nobreak >nul
+start "" http://localhost:3000
 
 echo.
-echo ========================================
-echo Application is starting...
-echo ========================================
+echo  =============================================
+echo       NexIPO is running!
+echo  =============================================
 echo.
-echo Backend API: http://localhost:8000
-echo API Docs:    http://localhost:8000/api/docs
-echo Frontend:    http://localhost:3000
+echo   Frontend:    http://localhost:3000
+echo   Backend:     http://localhost:8000
+echo   API Docs:    http://localhost:8000/api/docs
 echo.
-echo Two terminal windows will open:
-echo 1. Backend API (Python/FastAPI)
-echo 2. Frontend (Next.js)
+echo   Two terminal windows are open:
+echo     1. "NexIPO Backend"  - Python/FastAPI server
+echo     2. "NexIPO Frontend" - Next.js dev server
 echo.
-echo Press Ctrl+C in each window to stop
-echo ========================================
+echo   To stop: press Ctrl+C in each terminal window.
+echo  =============================================
 echo.
 pause

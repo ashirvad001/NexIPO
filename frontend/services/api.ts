@@ -51,8 +51,8 @@ export const apiService = {
     return response.data;
   },
 
-  async login(email: string, password: string) {
-    const response = await apiClient.post('/auth/login/json', { email, password });
+  async login(identifier: string, password: string) {
+    const response = await apiClient.post('/auth/login/json', { identifier, password });
     return response.data;
   },
 

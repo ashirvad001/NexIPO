@@ -12,7 +12,7 @@ from app.core.config import get_settings
 settings = get_settings()
 
 # Password hashing
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto", bcrypt__truncate_error=True)
 
 # JWT settings
 SECRET_KEY = settings.SECRET_KEY
@@ -115,11 +115,14 @@ class AuthService:
         return db_user
 
     @staticmethod
-    def authenticate_user(db: Session, email: str, password: str) -> Optional[User]:
+    def authenticate_user(db: Session, identifier: str, password: str) -> Optional[User]:
         """
-        Authenticate user with email and password
+        Authenticate user with email or username and password
         """
-        user = AuthService.get_user_by_email(db, email)
+        # Try email first, then username
+        user = AuthService.get_user_by_email(db, identifier)
+        if not user:
+            user = AuthService.get_user_by_username(db, identifier)
 
         if not user:
             return None

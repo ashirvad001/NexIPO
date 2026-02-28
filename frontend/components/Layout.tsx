@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { useAuth } from '@/contexts/AuthContext';
 import AuthModal from './AuthModal';
@@ -41,35 +42,40 @@ const Layout: React.FC<LayoutProps> = ({
         <title>{title}</title>
         <meta name="description" content={description} />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" href="/logo.png" />
       </Head>
 
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col bg-navy-50">
         {/* Header */}
-        <header className="bg-white shadow-sm sticky top-0 z-40">
+        <header className="bg-navy-900 shadow-nav sticky top-0 z-40">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center h-16">
               {/* Logo */}
-              <Link href="/" className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-700 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-lg">I</span>
-                </div>
-                <span className="text-xl font-bold text-gray-900">
-                  NexIPO
+              <Link href="/" className="flex items-center space-x-2">
+                <Image
+                  src="/logo.png"
+                  alt="NexIPO Logo"
+                  width={36}
+                  height={36}
+                  className="rounded-lg"
+                  priority
+                />
+                <span className="text-xl font-bold text-white">
+                  Nex<span className="text-primary-400">IPO</span>
                 </span>
               </Link>
 
               {/* Desktop Navigation */}
-              <nav className="hidden md:flex space-x-8">
+              <nav className="hidden md:flex space-x-1">
                 {navItems.map((item) => {
                   const isActive = router.pathname === item.href;
                   return (
                     <Link
                       key={item.href}
                       href={item.href}
-                      className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${isActive
-                          ? 'text-primary-600 bg-primary-50'
-                          : 'text-gray-700 hover:text-primary-600 hover:bg-gray-50'
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${isActive
+                        ? 'text-white bg-primary-600'
+                        : 'text-navy-300 hover:text-white hover:bg-navy-800'
                         }`}
                     >
                       {item.label}
@@ -83,11 +89,11 @@ const Layout: React.FC<LayoutProps> = ({
                 {user ? (
                   <div className="flex items-center space-x-3">
                     <Link href="/profile">
-                      <button className="flex items-center space-x-2 px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors">
-                        <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-700 rounded-full flex items-center justify-center">
+                      <button className="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-navy-800 transition-colors">
+                        <div className="w-8 h-8 bg-gradient-to-br from-primary-400 to-primary-600 rounded-full flex items-center justify-center">
                           <span className="text-white font-bold text-sm">{user.username[0].toUpperCase()}</span>
                         </div>
-                        <span className="text-sm font-medium text-gray-700">
+                        <span className="text-sm font-medium text-navy-200">
                           {user.username}
                         </span>
                       </button>
@@ -97,13 +103,13 @@ const Layout: React.FC<LayoutProps> = ({
                   <>
                     <button
                       onClick={() => handleAuthClick('login')}
-                      className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-primary-600 transition-colors"
+                      className="px-4 py-2 text-sm font-medium text-navy-300 hover:text-white transition-colors"
                     >
                       Sign In
                     </button>
                     <button
                       onClick={() => handleAuthClick('signup')}
-                      className="btn-primary text-sm"
+                      className="px-4 py-2 rounded-lg text-sm font-medium bg-primary-500 text-white hover:bg-primary-600 transition-colors"
                     >
                       Sign Up
                     </button>
@@ -115,7 +121,7 @@ const Layout: React.FC<LayoutProps> = ({
               <div className="md:hidden">
                 <button
                   onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                  className="text-gray-700 hover:text-primary-600"
+                  className="text-navy-300 hover:text-white"
                 >
                   <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     {mobileMenuOpen ? (
@@ -130,26 +136,26 @@ const Layout: React.FC<LayoutProps> = ({
 
             {/* Mobile Menu */}
             {mobileMenuOpen && (
-              <div className="md:hidden py-4 border-t border-gray-200">
-                <div className="space-y-2">
+              <div className="md:hidden py-4 border-t border-navy-700">
+                <div className="space-y-1">
                   {navItems.map((item) => (
                     <Link
                       key={item.href}
                       href={item.href}
                       onClick={() => setMobileMenuOpen(false)}
-                      className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-50"
+                      className="block px-3 py-2 rounded-lg text-base font-medium text-navy-200 hover:text-white hover:bg-navy-800"
                     >
                       {item.label}
                     </Link>
                   ))}
 
-                  <div className="pt-4 border-t border-gray-200 space-y-2">
+                  <div className="pt-4 border-t border-navy-700 space-y-1">
                     {user ? (
                       <>
                         <Link
                           href="/profile"
                           onClick={() => setMobileMenuOpen(false)}
-                          className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50"
+                          className="block px-3 py-2 rounded-lg text-base font-medium text-navy-200 hover:text-white hover:bg-navy-800"
                         >
                           Profile
                         </Link>
@@ -161,7 +167,7 @@ const Layout: React.FC<LayoutProps> = ({
                             handleAuthClick('login');
                             setMobileMenuOpen(false);
                           }}
-                          className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50"
+                          className="block w-full text-left px-3 py-2 rounded-lg text-base font-medium text-navy-200 hover:text-white hover:bg-navy-800"
                         >
                           Sign In
                         </button>
@@ -170,7 +176,7 @@ const Layout: React.FC<LayoutProps> = ({
                             handleAuthClick('signup');
                             setMobileMenuOpen(false);
                           }}
-                          className="block w-full btn-primary text-base"
+                          className="block w-full mt-2 px-4 py-2 rounded-lg text-base font-medium bg-primary-500 text-white hover:bg-primary-600"
                         >
                           Sign Up
                         </button>
@@ -189,21 +195,21 @@ const Layout: React.FC<LayoutProps> = ({
         </main>
 
         {/* Footer */}
-        <footer className="bg-white border-t border-gray-200 mt-12">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <footer className="bg-navy-900 mt-12">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div>
-                <h3 className="text-sm font-semibold text-gray-900 mb-3">About</h3>
-                <p className="text-sm text-gray-600">
+                <h3 className="text-sm font-semibold text-white mb-3">About</h3>
+                <p className="text-sm text-navy-300 leading-relaxed">
                   ML-powered platform for IPO analysis and risk assessment. Built for placements and final year projects.
                 </p>
               </div>
               <div>
-                <h3 className="text-sm font-semibold text-gray-900 mb-3">Quick Links</h3>
+                <h3 className="text-sm font-semibold text-white mb-3">Quick Links</h3>
                 <ul className="space-y-2">
                   {navItems.map((item) => (
                     <li key={item.href}>
-                      <Link href={item.href} className="text-sm text-gray-600 hover:text-primary-600">
+                      <Link href={item.href} className="text-sm text-navy-300 hover:text-primary-400 transition-colors">
                         {item.label}
                       </Link>
                     </li>
@@ -211,16 +217,25 @@ const Layout: React.FC<LayoutProps> = ({
                 </ul>
               </div>
               <div>
-                <h3 className="text-sm font-semibold text-gray-900 mb-3">Technology</h3>
-                <p className="text-sm text-gray-600">
+                <h3 className="text-sm font-semibold text-white mb-3">Technology</h3>
+                <p className="text-sm text-navy-300">
                   Next.js • TypeScript • FastAPI • PostgreSQL • Machine Learning
                 </p>
               </div>
             </div>
-            <div className="mt-8 pt-8 border-t border-gray-200">
-              <p className="text-sm text-gray-500 text-center">
-                © {new Date().getFullYear()} NexIPO. Built for educational purposes.
-              </p>
+            <div className="mt-8 pt-8 border-t border-navy-700">
+              <div className="flex items-center justify-center space-x-2">
+                <Image
+                  src="/logo.png"
+                  alt="NexIPO Logo"
+                  width={24}
+                  height={24}
+                  className="rounded"
+                />
+                <p className="text-sm text-navy-400">
+                  © {new Date().getFullYear()} NexIPO. Built for educational purposes.
+                </p>
+              </div>
             </div>
           </div>
         </footer>

@@ -15,7 +15,7 @@ interface AuthContextType {
   user: User | null;
   token: string | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (identifier: string, password: string) => Promise<void>;
   signup: (data: SignupData) => Promise<void>;
   logout: () => void;
   updateProfile: (data: ProfileUpdate) => Promise<void>;
@@ -55,21 +55,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Set token in API service
       apiService.setAuthToken(storedToken);
     }
-    
+
     setLoading(false);
   }, []);
 
-  const login = async (email: string, password: string) => {
+  const login = async (identifier: string, password: string) => {
     try {
-      const response = await apiService.login(email, password);
-      
+      const response = await apiService.login(identifier, password);
+
       setToken(response.access_token);
       setUser(response.user);
-      
+
       // Store in localStorage
       localStorage.setItem('token', response.access_token);
       localStorage.setItem('user', JSON.stringify(response.user));
-      
+
       // Set token in API service
       apiService.setAuthToken(response.access_token);
     } catch (error: any) {
@@ -80,14 +80,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signup = async (data: SignupData) => {
     try {
       const response = await apiService.signup(data);
-      
+
       setToken(response.access_token);
       setUser(response.user);
-      
+
       // Store in localStorage
       localStorage.setItem('token', response.access_token);
       localStorage.setItem('user', JSON.stringify(response.user));
-      
+
       // Set token in API service
       apiService.setAuthToken(response.access_token);
     } catch (error: any) {
@@ -98,11 +98,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = () => {
     setToken(null);
     setUser(null);
-    
+
     // Clear localStorage
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    
+
     // Clear token from API service
     apiService.setAuthToken(null);
   };
@@ -110,7 +110,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const updateProfile = async (data: ProfileUpdate) => {
     try {
       const response = await apiService.updateProfile(data);
-      
+
       setUser(response);
       localStorage.setItem('user', JSON.stringify(response));
     } catch (error: any) {

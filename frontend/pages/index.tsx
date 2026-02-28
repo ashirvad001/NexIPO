@@ -58,22 +58,22 @@ export default function Home() {
     <Layout title="Dashboard - NexIPO">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Hero Section */}
-        <div className="bg-gradient-to-r from-primary-600 to-primary-700 rounded-2xl p-8 mb-8 text-white">
+        <div className="bg-gradient-to-r from-navy-800 to-navy-900 rounded-2xl p-8 mb-8 text-white">
           <h1 className="text-3xl font-bold mb-3">
             Welcome to NexIPO
           </h1>
-          <p className="text-primary-100 text-lg max-w-2xl">
-            ML-powered analysis and risk assessment for Initial Public Offerings. 
+          <p className="text-navy-300 text-lg max-w-2xl">
+            ML-powered analysis and risk assessment for Initial Public Offerings.
             Make informed investment decisions with data-driven insights.
           </p>
           <div className="mt-6 flex gap-4">
-            <div className="bg-white/20 backdrop-blur-sm rounded-lg px-6 py-3">
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl px-6 py-3 border border-white/10">
               <p className="text-2xl font-bold">{activeIPOs.length}</p>
-              <p className="text-sm text-primary-100">Active IPOs</p>
+              <p className="text-sm text-navy-300">Active IPOs</p>
             </div>
-            <div className="bg-white/20 backdrop-blur-sm rounded-lg px-6 py-3">
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl px-6 py-3 border border-white/10">
               <p className="text-2xl font-bold">{upcomingIPOs.length}</p>
-              <p className="text-sm text-primary-100">Upcoming</p>
+              <p className="text-sm text-navy-300">Upcoming</p>
             </div>
           </div>
         </div>
@@ -82,8 +82,8 @@ export default function Home() {
         <section className="mb-12">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">Active IPOs</h2>
-              <p className="text-gray-600 mt-1">Currently open for subscription</p>
+              <h2 className="text-2xl font-bold text-navy-900">Active IPOs</h2>
+              <p className="text-navy-500 mt-1">Currently open for subscription</p>
             </div>
             {activeIPOs.length > 0 && (
               <a href="/active" className="text-primary-600 hover:text-primary-700 font-medium text-sm">
@@ -115,8 +115,8 @@ export default function Home() {
         <section>
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">Upcoming IPOs</h2>
-              <p className="text-gray-600 mt-1">Opening soon</p>
+              <h2 className="text-2xl font-bold text-navy-900">Upcoming IPOs</h2>
+              <p className="text-navy-500 mt-1">Opening soon</p>
             </div>
             {upcomingIPOs.length > 0 && (
               <a href="/upcoming" className="text-primary-600 hover:text-primary-700 font-medium text-sm">

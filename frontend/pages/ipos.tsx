@@ -61,7 +61,7 @@ export default function AllIPOs() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">All IPOs</h1>
+          <h1 className="text-3xl font-bold text-navy-900 mb-2">All IPOs</h1>
           <p className="text-gray-600">
             {data ? `Showing ${data.items.length} of ${data.total} IPOs` : 'Browse all IPOs'}
           </p>
@@ -170,8 +170,8 @@ export default function AllIPOs() {
             <button
               onClick={() => setSortOrder('asc')}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${sortOrder === 'asc'
-                  ? 'bg-primary-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                ? 'bg-primary-600 text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
             >
               Ascending
@@ -179,8 +179,8 @@ export default function AllIPOs() {
             <button
               onClick={() => setSortOrder('desc')}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${sortOrder === 'desc'
-                  ? 'bg-primary-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                ? 'bg-primary-600 text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
             >
               Descending
@@ -253,8 +253,8 @@ export default function AllIPOs() {
                           key={pageNum}
                           onClick={() => setPage(pageNum)}
                           className={`px-4 py-2 rounded-lg text-sm font-medium ${page === pageNum
-                              ? 'bg-primary-600 text-white'
-                              : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                            ? 'bg-primary-600 text-white'
+                            : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
                             }`}
                         >
                           {pageNum}
@@ -281,7 +281,7 @@ export default function AllIPOs() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">No IPOs Found</h3>
+            <h3 className="text-lg font-semibold text-navy-900 mb-2">No IPOs Found</h3>
             <p className="text-gray-600 mb-4">Try adjusting your filters</p>
             <button
               onClick={() => {

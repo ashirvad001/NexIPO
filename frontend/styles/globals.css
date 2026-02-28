@@ -2,36 +2,120 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── Google Font ── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+/* ── Base layer ── */
+@layer base {
+  html {
+    @apply scroll-smooth;
+  }
+
+  body {
+    @apply bg-navy-50 text-navy-800 font-sans antialiased;
+  }
+
+  /* Subtle scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-navy-100;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-navy-300 rounded-full;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-navy-400;
+  }
+}
+
+/* ── Component layer ── */
 @layer components {
   .card {
-    @apply bg-white rounded-lg shadow-card p-6 hover:shadow-card-hover transition-shadow;
+    @apply bg-white rounded-xl border border-navy-100 shadow-card p-6
+           hover:shadow-card-hover hover:border-navy-200 transition-all duration-200;
   }
 
   .btn {
-    @apply px-4 py-2 rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2;
+    @apply px-4 py-2 rounded-lg font-medium transition-all duration-200
+           focus:outline-none focus:ring-2 focus:ring-offset-2 cursor-pointer;
   }
 
   .btn-primary {
-    @apply btn bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500;
+    @apply btn bg-navy-900 text-white hover:bg-navy-800
+           focus:ring-navy-500 active:bg-navy-950;
   }
 
   .btn-secondary {
-    @apply btn bg-gray-200 text-gray-900 hover:bg-gray-300 focus:ring-gray-500;
+    @apply btn bg-navy-100 text-navy-800 hover:bg-navy-200
+           focus:ring-navy-300 border border-navy-200;
+  }
+
+  .btn-accent {
+    @apply btn bg-primary-500 text-white hover:bg-primary-600
+           focus:ring-primary-400;
   }
 
   .badge {
-    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium;
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold
+           tracking-wide uppercase;
   }
 
   .input {
-    @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent;
+    @apply w-full px-4 py-2.5 bg-white border border-navy-200 rounded-lg
+           text-navy-800 placeholder-navy-400
+           focus:ring-2 focus:ring-primary-500 focus:border-primary-500
+           transition-colors duration-150;
   }
 
   .select {
-    @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white;
+    @apply w-full px-4 py-2.5 bg-white border border-navy-200 rounded-lg
+           text-navy-800
+           focus:ring-2 focus:ring-primary-500 focus:border-primary-500
+           transition-colors duration-150;
   }
 
   .spinner {
-    @apply inline-block w-12 h-12 border-4 border-gray-200 border-t-transparent rounded-full animate-spin;
+    @apply inline-block w-12 h-12 border-4 border-navy-200 border-t-primary-500
+           rounded-full animate-spin;
+  }
+
+  /* Stat card variant (like the reference design) */
+  .stat-card {
+    @apply bg-white rounded-xl border border-navy-100 shadow-card p-5;
+  }
+
+  /* Section title */
+  .section-title {
+    @apply text-xs font-bold tracking-widest uppercase text-navy-400;
+  }
+}
+
+/* ── Utility layer ── */
+@layer utilities {
+  /* Glassmorphism overlay */
+  .glass {
+    @apply bg-white/80 backdrop-blur-md;
+  }
+
+  /* Gradient text */
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary-500 to-accent-500;
+  }
+
+  /* Subtle pulse animation for live indicators */
+  .pulse-dot {
+    @apply relative;
+  }
+  .pulse-dot::before {
+    content: '';
+    @apply absolute -top-0.5 -right-0.5 w-2 h-2 bg-success-500 rounded-full;
+    animation: pulse-ring 2s ease-out infinite;
+  }
+  @keyframes pulse-ring {
+    0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6); }
+    70% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
   }
 }

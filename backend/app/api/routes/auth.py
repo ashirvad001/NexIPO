@@ -47,9 +47,9 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
 
 @router.post("/auth/login/json", response_model=Token)
 def login_json(payload: dict, db: Session = Depends(get_db)):
-    email = payload.get("email")
+    identifier = payload.get("identifier") or payload.get("email")
     password = payload.get("password")
-    user = AuthService.authenticate_user(db, email, password)
+    user = AuthService.authenticate_user(db, identifier, password)
     if not user:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect credentials")
     access_token = AuthService.create_access_token({"sub": str(user.id), "email": user.email})

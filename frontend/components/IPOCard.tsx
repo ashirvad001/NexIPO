@@ -26,11 +26,11 @@ const IPOCard: React.FC<IPOCardProps> = ({ ipo }) => {
         {/* Header */}
         <div className="flex justify-between items-start mb-4">
           <div className="flex-1">
-            <h3 className="text-lg font-semibold text-gray-900 mb-1">
+            <h3 className="text-lg font-semibold text-navy-900 mb-1">
               {ipo.company_name}
             </h3>
             {ipo.symbol && (
-              <p className="text-sm text-gray-600 font-mono">
+              <p className="text-sm text-navy-500 font-mono">
                 {ipo.symbol}
               </p>
             )}
@@ -43,7 +43,7 @@ const IPOCard: React.FC<IPOCardProps> = ({ ipo }) => {
         {/* Industry & Type */}
         <div className="flex gap-2 mb-4">
           {ipo.industry_sector && (
-            <span className="badge bg-gray-100 text-gray-700">
+            <span className="badge bg-gray-100 text-navy-700">
               {ipo.industry_sector}
             </span>
           )}
@@ -57,8 +57,8 @@ const IPOCard: React.FC<IPOCardProps> = ({ ipo }) => {
           {/* Price Band */}
           {ipo.price_band_lower && ipo.price_band_upper && (
             <div>
-              <p className="text-xs text-gray-500 mb-1">Price Band</p>
-              <p className="text-sm font-semibold text-gray-900">
+              <p className="text-xs text-navy-400 mb-1">Price Band</p>
+              <p className="text-sm font-semibold text-navy-900">
                 ₹{ipo.price_band_lower} - ₹{ipo.price_band_upper}
               </p>
             </div>
@@ -67,8 +67,8 @@ const IPOCard: React.FC<IPOCardProps> = ({ ipo }) => {
           {/* Issue Size */}
           {ipo.issue_size_rs_cr && (
             <div>
-              <p className="text-xs text-gray-500 mb-1">Issue Size</p>
-              <p className="text-sm font-semibold text-gray-900">
+              <p className="text-xs text-navy-400 mb-1">Issue Size</p>
+              <p className="text-sm font-semibold text-navy-900">
                 {formatCrores(ipo.issue_size_rs_cr)}
               </p>
             </div>
@@ -77,7 +77,7 @@ const IPOCard: React.FC<IPOCardProps> = ({ ipo }) => {
           {/* Subscription */}
           {ipo.total_subscription && (
             <div>
-              <p className="text-xs text-gray-500 mb-1">Subscription</p>
+              <p className="text-xs text-navy-400 mb-1">Subscription</p>
               <p className="text-sm font-semibold text-green-600">
                 {formatSubscription(ipo.total_subscription)}
               </p>
@@ -87,10 +87,9 @@ const IPOCard: React.FC<IPOCardProps> = ({ ipo }) => {
           {/* GMP */}
           {ipo.gmp_percentage && (
             <div>
-              <p className="text-xs text-gray-500 mb-1">GMP</p>
-              <p className={`text-sm font-semibold ${
-                ipo.gmp_percentage > 0 ? 'text-green-600' : 'text-red-600'
-              }`}>
+              <p className="text-xs text-navy-400 mb-1">GMP</p>
+              <p className={`text-sm font-semibold ${ipo.gmp_percentage > 0 ? 'text-green-600' : 'text-red-600'
+                }`}>
                 {formatPercentage(ipo.gmp_percentage)}
               </p>
             </div>
@@ -98,13 +97,13 @@ const IPOCard: React.FC<IPOCardProps> = ({ ipo }) => {
         </div>
 
         {/* Dates */}
-        <div className="border-t border-gray-200 pt-4 mb-4">
+        <div className="border-t border-navy-100 pt-4 mb-4">
           {ipo.status === 'open' && daysUntilClose !== null && (
             <div className="flex items-center text-sm">
               <svg className="w-4 h-4 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
               </svg>
-              <span className="text-gray-700">
+              <span className="text-navy-700">
                 Closes in <span className="font-semibold">{daysUntilClose} days</span>
               </span>
             </div>
@@ -115,14 +114,14 @@ const IPOCard: React.FC<IPOCardProps> = ({ ipo }) => {
               <svg className="w-4 h-4 mr-2 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
               </svg>
-              <span className="text-gray-700">
+              <span className="text-navy-700">
                 Opens in <span className="font-semibold">{daysUntilOpen} days</span>
               </span>
             </div>
           )}
 
           {ipo.open_date && ipo.close_date && (
-            <div className="text-xs text-gray-500 mt-2">
+            <div className="text-xs text-navy-400 mt-2">
               {formatDate(ipo.open_date, 'dd MMM')} - {formatDate(ipo.close_date, 'dd MMM yyyy')}
             </div>
           )}
@@ -130,18 +129,18 @@ const IPOCard: React.FC<IPOCardProps> = ({ ipo }) => {
 
         {/* Risk Assessment */}
         {ipo.ml_processed && ipo.risk_score !== null && (
-          <div className="border-t border-gray-200 pt-4">
+          <div className="border-t border-navy-100 pt-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center">
                 <svg className="w-4 h-4 mr-2 text-purple-500" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
                   <path fillRule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm9.707 5.707a1 1 0 00-1.414-1.414L9 12.586l-1.293-1.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                 </svg>
-                <span className="text-xs text-gray-600">Risk Score</span>
+                <span className="text-xs text-navy-500">Risk Score</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="text-right">
-                  <p className="text-sm font-semibold text-gray-900">
+                  <p className="text-sm font-semibold text-navy-900">
                     {ipo.risk_score.toFixed(1)}/100
                   </p>
                 </div>
@@ -157,12 +156,11 @@ const IPOCard: React.FC<IPOCardProps> = ({ ipo }) => {
 
         {/* Listing Gain (for listed IPOs) */}
         {ipo.status === 'listed' && ipo.listing_gain_percentage !== null && (
-          <div className="border-t border-gray-200 pt-4 mt-4">
+          <div className="border-t border-navy-100 pt-4 mt-4">
             <div className="flex items-center justify-between">
-              <span className="text-xs text-gray-600">Listing Gain</span>
-              <span className={`text-sm font-semibold ${
-                ipo.listing_gain_percentage > 0 ? 'text-green-600' : 'text-red-600'
-              }`}>
+              <span className="text-xs text-navy-500">Listing Gain</span>
+              <span className={`text-sm font-semibold ${ipo.listing_gain_percentage > 0 ? 'text-green-600' : 'text-red-600'
+                }`}>
                 {formatPercentage(ipo.listing_gain_percentage)}
               </span>
             </div>

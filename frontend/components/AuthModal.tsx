@@ -21,7 +21,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, defaultView = 'l
   const [error, setError] = useState<string | null>(null);
 
   // Login form state
-  const [loginEmail, setLoginEmail] = useState('');
+  const [loginIdentifier, setLoginIdentifier] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
 
   // Signup form state
@@ -39,10 +39,10 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, defaultView = 'l
     setError(null);
 
     try {
-      await login(loginEmail, loginPassword);
+      await login(loginIdentifier, loginPassword);
       onClose();
       // Reset form
-      setLoginEmail('');
+      setLoginIdentifier('');
       setLoginPassword('');
     } catch (err: any) {
       setError(err.message);
@@ -79,7 +79,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, defaultView = 'l
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
       {/* Backdrop */}
-      <div 
+      <div
         className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
         onClick={onClose}
       />
@@ -103,8 +103,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, defaultView = 'l
               {view === 'login' ? 'Welcome Back' : 'Create Account'}
             </h2>
             <p className="text-sm text-gray-600 mt-1">
-              {view === 'login' 
-                ? 'Sign in to access your IPO portfolio' 
+              {view === 'login'
+                ? 'Sign in to access your IPO portfolio'
                 : 'Join to start tracking IPOs'}
             </p>
           </div>
@@ -121,14 +121,14 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, defaultView = 'l
             <form onSubmit={handleLogin} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Email
+                  Email or Username
                 </label>
                 <input
-                  type="email"
-                  value={loginEmail}
-                  onChange={(e) => setLoginEmail(e.target.value)}
+                  type="text"
+                  value={loginIdentifier}
+                  onChange={(e) => setLoginIdentifier(e.target.value)}
                   className="input w-full"
-                  placeholder="you@example.com"
+                  placeholder="you@example.com or username"
                   required
                 />
               </div>
