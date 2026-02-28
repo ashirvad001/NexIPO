@@ -101,7 +101,7 @@ def get_ipos(
     max_risk_score: Optional[float] = Query(None, ge=0, le=100, description="Maximum risk score"),
     search: Optional[str] = Query(None, description="Search in company name or symbol"),
     sort_by: str = Query("created_at", description="Field to sort by"),
-    sort_order: str = Query("desc", regex="^(asc|desc)$", description="Sort order"),
+    sort_order: str = Query("desc", pattern="^(asc|desc)$", description="Sort order"),
     db: Session = Depends(get_db)
 ):
     """

@@ -1,4 +1,4 @@
-# Backend main entry point
+ # Backend main entry point
 from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -20,8 +20,8 @@ async def lifespan(app: FastAPI):
     Application lifespan handler for startup and shutdown events.
     """
     # Startup
-    print("🚀 Starting NexIPO...")
-    print(f"📊 Environment: {'Development' if settings.DEBUG else 'Production'}")
+    print("[START] Starting NexIPO...")
+    print(f"[ENV] Environment: {'Development' if settings.DEBUG else 'Production'}")
     
     # Initialize NLTK
     try:
@@ -29,16 +29,16 @@ async def lifespan(app: FastAPI):
         nltk.download('punkt', quiet=True)
         nltk.download('stopwords', quiet=True)
         nltk.download('wordnet', quiet=True)
-        print("✅ NLTK initialized")
+        print("[OK] NLTK initialized")
     except Exception as e:
-        print(f"⚠️ NLTK initialization warning: {e}")
+        print(f"[WARN] NLTK initialization warning: {e}")
     
     # Initialize database
     try:
         Base.metadata.create_all(bind=engine)
-        print("✅ Database initialized successfully")
+        print("[OK] Database initialized successfully")
     except Exception as e:
-        print(f"❌ Database initialization failed: {e}")
+        print(f"[ERROR] Database initialization failed: {e}")
         raise
     
     # Load ML model
@@ -46,21 +46,21 @@ async def lifespan(app: FastAPI):
         from app.ml_service.inference.risk_predictor import get_predictor
         predictor = get_predictor()
         if predictor.classifier.is_fitted:
-            print("✅ ML model loaded successfully")
+            print("[OK] ML model loaded successfully")
         else:
-            print("⚠️ ML model not trained yet")
+            print("[WARN] ML model not trained yet")
     except Exception as e:
-        print(f"⚠️ ML model loading warning: {e}")
+        print(f"[WARN] ML model loading warning: {e}")
     
     # Start background IPO sync
     sync_task = asyncio.create_task(_background_ipo_sync())
-    print("🔄 Background IPO sync started")
+    print("[SYNC] Background IPO sync started")
     
     yield
     
     # Shutdown
     sync_task.cancel()
-    print("👋 Shutting down NexIPO...")
+    print("[STOP] Shutting down NexIPO...")
 
 
 # Create FastAPI application
@@ -187,18 +187,18 @@ async def _background_ipo_sync():
         try:
             summary = await sync_ipos(db)
             logger.info(
-                f"✅ Initial IPO sync: {summary['added']} added, "
+                f"[OK] Initial IPO sync: {summary['added']} added, "
                 f"{summary['updated']} updated, {summary['total_scraped']} scraped"
             )
             print(
-                f"✅ Initial IPO sync: {summary['added']} added, "
+                f"[OK] Initial IPO sync: {summary['added']} added, "
                 f"{summary['updated']} updated, {summary['total_scraped']} scraped"
             )
         finally:
             db.close()
     except Exception as e:
-        logger.error(f"❌ Initial IPO sync failed: {e}")
-        print(f"❌ Initial IPO sync failed: {e}")
+        logger.error(f"[ERROR] Initial IPO sync failed: {e}")
+        print(f"[ERROR] Initial IPO sync failed: {e}")
 
     # Periodic sync every 30 minutes
     while True:
@@ -208,7 +208,7 @@ async def _background_ipo_sync():
             try:
                 summary = await sync_ipos(db)
                 logger.info(
-                    f"🔄 Periodic IPO sync: {summary['added']} added, "
+                    f"[SYNC] Periodic IPO sync: {summary['added']} added, "
                     f"{summary['updated']} updated"
                 )
             finally:
@@ -216,7 +216,7 @@ async def _background_ipo_sync():
         except asyncio.CancelledError:
             break
         except Exception as e:
-            logger.error(f"❌ Periodic IPO sync failed: {e}")
+            logger.error(f"[ERROR] Periodic IPO sync failed: {e}")
 
 
 if __name__ == "__main__":
