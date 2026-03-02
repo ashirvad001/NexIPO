@@ -8,21 +8,21 @@ interface LoadingProps {
 
 const Loading: React.FC<LoadingProps> = ({ fullScreen = false, text = 'Loading...' }) => {
   const content = (
-    <div className="flex flex-col items-center justify-center">
-      <div className="spinner border-primary-600"></div>
-      <p className="mt-4 text-sm text-gray-600">{text}</p>
+    <div className="flex flex-col items-center justify-center" role="status" aria-label={text}>
+      <div className="spinner" aria-hidden="true"></div>
+      <p className="mt-4 text-sm text-navy-500 font-medium">{text}</p>
     </div>
   );
 
   if (fullScreen) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-[60vh] flex items-center justify-center animate-fade-in">
         {content}
       </div>
     );
   }
 
-  return <div className="py-12">{content}</div>;
+  return <div className="py-10 sm:py-12 animate-fade-in">{content}</div>;
 };
 
 export default Loading;

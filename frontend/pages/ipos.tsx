@@ -53,29 +53,36 @@ export default function AllIPOs() {
   }, [page, status, ipoType, sector, search, sortBy, sortOrder]);
 
   const handleFilterChange = () => {
-    setPage(1); // Reset to first page when filters change
+    setPage(1);
+  };
+
+  const hasActiveFilters = status || ipoType || sector || search;
+
+  const clearAllFilters = () => {
+    setStatus('');
+    setIPOType('');
+    setSector('');
+    setSearch('');
+    setPage(1);
   };
 
   return (
     <Layout title="All IPOs - NexIPO">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="page-container">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-navy-900 mb-2">All IPOs</h1>
-          <p className="text-gray-600">
-            {data ? `Showing ${data.items.length} of ${data.total} IPOs` : 'Browse all IPOs'}
-          </p>
+        <div className="page-header">
+          <h1>All IPOs</h1>
+          <p>{data ? `Showing ${data.items.length} of ${data.total} IPOs` : 'Browse all IPOs'}</p>
         </div>
 
         {/* Filters */}
-        <div className="card mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div className="card mb-6 sm:mb-8">
+          <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
             {/* Search */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Search
-              </label>
+            <div className="xs:col-span-2 lg:col-span-1">
+              <label htmlFor="filter-search" className="label">Search</label>
               <input
+                id="filter-search"
                 type="text"
                 placeholder="Company name or symbol..."
                 value={search}
@@ -89,10 +96,9 @@ export default function AllIPOs() {
 
             {/* Status Filter */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Status
-              </label>
+              <label htmlFor="filter-status" className="label">Status</label>
               <select
+                id="filter-status"
                 value={status}
                 onChange={(e) => {
                   setStatus(e.target.value as IPOStatus | '');
@@ -111,10 +117,9 @@ export default function AllIPOs() {
 
             {/* Type Filter */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Type
-              </label>
+              <label htmlFor="filter-type" className="label">Type</label>
               <select
+                id="filter-type"
                 value={ipoType}
                 onChange={(e) => {
                   setIPOType(e.target.value as IPOType | '');
@@ -130,10 +135,9 @@ export default function AllIPOs() {
 
             {/* Sector Filter */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Sector
-              </label>
+              <label htmlFor="filter-sector" className="label">Sector</label>
               <input
+                id="filter-sector"
                 type="text"
                 placeholder="e.g., Technology"
                 value={sector}
@@ -147,10 +151,9 @@ export default function AllIPOs() {
 
             {/* Sort */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Sort By
-              </label>
+              <label htmlFor="filter-sort" className="label">Sort By</label>
               <select
+                id="filter-sort"
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
                 className="select"
@@ -165,38 +168,33 @@ export default function AllIPOs() {
             </div>
           </div>
 
-          {/* Sort Order Toggle */}
-          <div className="mt-4 flex gap-2">
+          {/* Sort Order & Clear Filters */}
+          <div className="mt-4 flex flex-wrap items-center gap-2">
             <button
               onClick={() => setSortOrder('asc')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${sortOrder === 'asc'
+              className={`px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors ${sortOrder === 'asc'
                 ? 'bg-primary-600 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                : 'bg-navy-100 text-navy-700 hover:bg-navy-200'
                 }`}
+              aria-pressed={sortOrder === 'asc'}
             >
-              Ascending
+              ↑ Ascending
             </button>
             <button
               onClick={() => setSortOrder('desc')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${sortOrder === 'desc'
+              className={`px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors ${sortOrder === 'desc'
                 ? 'bg-primary-600 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                : 'bg-navy-100 text-navy-700 hover:bg-navy-200'
                 }`}
+              aria-pressed={sortOrder === 'desc'}
             >
-              Descending
+              ↓ Descending
             </button>
 
-            {/* Clear Filters */}
-            {(status || ipoType || sector || search) && (
+            {hasActiveFilters && (
               <button
-                onClick={() => {
-                  setStatus('');
-                  setIPOType('');
-                  setSector('');
-                  setSearch('');
-                  setPage(1);
-                }}
-                className="ml-auto px-4 py-2 bg-red-100 text-red-700 rounded-lg text-sm font-medium hover:bg-red-200 transition-colors"
+                onClick={clearAllFilters}
+                className="ml-auto px-3 sm:px-4 py-2 bg-danger-50 text-danger-700 rounded-lg text-xs sm:text-sm font-medium hover:bg-danger-100 transition-colors"
               >
                 Clear Filters
               </button>
@@ -212,7 +210,7 @@ export default function AllIPOs() {
         ) : data && data.items.length > 0 ? (
           <>
             {/* IPO Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            <div className="ipo-grid mb-6 sm:mb-8">
               {data.items.map((ipo) => (
                 <IPOCard key={ipo.id} ipo={ipo} />
               ))}
@@ -220,22 +218,23 @@ export default function AllIPOs() {
 
             {/* Pagination */}
             {data.total_pages > 1 && (
-              <div className="flex items-center justify-between">
-                <p className="text-sm text-gray-600">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <p className="text-sm text-navy-500 order-2 sm:order-1">
                   Page {data.page} of {data.total_pages}
                 </p>
 
-                <div className="flex gap-2">
+                <div className="flex gap-2 order-1 sm:order-2">
                   <button
                     onClick={() => setPage(Math.max(1, page - 1))}
                     disabled={page === 1}
-                    className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-3 sm:px-4 py-2 bg-white border border-navy-200 rounded-lg text-xs sm:text-sm font-medium text-navy-700 hover:bg-navy-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    aria-label="Previous page"
                   >
-                    Previous
+                    ← Prev
                   </button>
 
                   {/* Page numbers */}
-                  <div className="hidden md:flex gap-2">
+                  <div className="hidden sm:flex gap-1.5">
                     {Array.from({ length: Math.min(5, data.total_pages) }, (_, i) => {
                       let pageNum;
                       if (data.total_pages <= 5) {
@@ -247,15 +246,16 @@ export default function AllIPOs() {
                       } else {
                         pageNum = page - 2 + i;
                       }
-
                       return (
                         <button
                           key={pageNum}
                           onClick={() => setPage(pageNum)}
-                          className={`px-4 py-2 rounded-lg text-sm font-medium ${page === pageNum
+                          className={`w-9 h-9 rounded-lg text-sm font-medium transition-colors ${page === pageNum
                             ? 'bg-primary-600 text-white'
-                            : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                            : 'bg-white border border-navy-200 text-navy-700 hover:bg-navy-50'
                             }`}
+                          aria-label={`Go to page ${pageNum}`}
+                          aria-current={page === pageNum ? 'page' : undefined}
                         >
                           {pageNum}
                         </button>
@@ -263,36 +263,33 @@ export default function AllIPOs() {
                     })}
                   </div>
 
+                  {/* Mobile page indicator */}
+                  <div className="sm:hidden flex items-center px-3 py-2 bg-white border border-navy-200 rounded-lg text-xs font-medium text-navy-700">
+                    {page}/{data.total_pages}
+                  </div>
+
                   <button
                     onClick={() => setPage(Math.min(data.total_pages, page + 1))}
                     disabled={page === data.total_pages}
-                    className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-3 sm:px-4 py-2 bg-white border border-navy-200 rounded-lg text-xs sm:text-sm font-medium text-navy-700 hover:bg-navy-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    aria-label="Next page"
                   >
-                    Next
+                    Next →
                   </button>
                 </div>
               </div>
             )}
           </>
         ) : (
-          <div className="card text-center py-12">
-            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="empty-state">
+            <div className="empty-state-icon">
+              <svg className="w-7 h-7 text-navy-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
             </div>
             <h3 className="text-lg font-semibold text-navy-900 mb-2">No IPOs Found</h3>
-            <p className="text-gray-600 mb-4">Try adjusting your filters</p>
-            <button
-              onClick={() => {
-                setStatus('');
-                setIPOType('');
-                setSector('');
-                setSearch('');
-                setPage(1);
-              }}
-              className="btn-primary"
-            >
+            <p className="text-navy-500 text-sm mb-5">Try adjusting your filters</p>
+            <button onClick={clearAllFilters} className="btn-primary">
               Clear All Filters
             </button>
           </div>

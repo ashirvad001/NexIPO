@@ -21,7 +21,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (e.type === 'dragenter' || e.type === 'dragover') {
       setDragActive(true);
     } else if (e.type === 'dragleave') {
@@ -123,11 +123,10 @@ const FileUpload: React.FC<FileUploadProps> = ({
   return (
     <div className="space-y-4">
       <div
-        className={`relative border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-          dragActive
-            ? 'border-primary-500 bg-primary-50'
-            : 'border-gray-300 hover:border-gray-400'
-        } ${uploading ? 'pointer-events-none opacity-50' : ''}`}
+        className={`relative border-2 border-dashed rounded-xl p-6 sm:p-8 text-center transition-all duration-200 ${dragActive
+            ? 'border-primary-500 bg-primary-50/50'
+            : 'border-navy-300 hover:border-navy-400 bg-white'
+          } ${uploading ? 'pointer-events-none opacity-50' : ''}`}
         onDragEnter={handleDrag}
         onDragLeave={handleDrag}
         onDragOver={handleDrag}
@@ -140,15 +139,17 @@ const FileUpload: React.FC<FileUploadProps> = ({
           onChange={handleChange}
           className="hidden"
           disabled={uploading}
+          aria-label="Upload prospectus PDF"
         />
 
         {!selectedFile ? (
           <div>
             <svg
-              className="mx-auto h-12 w-12 text-gray-400"
+              className="mx-auto h-10 w-10 sm:h-12 sm:w-12 text-navy-400"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
+              aria-hidden="true"
             >
               <path
                 strokeLinecap="round"
@@ -157,7 +158,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
                 d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
               />
             </svg>
-            <p className="mt-4 text-sm text-gray-600">
+            <p className="mt-3 sm:mt-4 text-xs sm:text-sm text-navy-600">
               Drag and drop prospectus PDF here, or{' '}
               <button
                 type="button"
@@ -167,17 +168,18 @@ const FileUpload: React.FC<FileUploadProps> = ({
                 browse
               </button>
             </p>
-            <p className="mt-2 text-xs text-gray-500">
+            <p className="mt-1.5 sm:mt-2 text-2xs sm:text-xs text-navy-400">
               PDF files only, max 50MB
             </p>
           </div>
         ) : (
           <div>
             <svg
-              className="mx-auto h-12 w-12 text-green-500"
+              className="mx-auto h-10 w-10 sm:h-12 sm:w-12 text-success-500"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
+              aria-hidden="true"
             >
               <path
                 strokeLinecap="round"
@@ -186,17 +188,17 @@ const FileUpload: React.FC<FileUploadProps> = ({
                 d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
               />
             </svg>
-            <p className="mt-4 text-sm font-medium text-gray-900">
+            <p className="mt-3 sm:mt-4 text-xs sm:text-sm font-medium text-navy-900">
               {selectedFile.name}
             </p>
-            <p className="mt-1 text-xs text-gray-500">
+            <p className="mt-1 text-2xs sm:text-xs text-navy-500">
               {(selectedFile.size / (1024 * 1024)).toFixed(2)} MB
             </p>
             {!uploading && (
               <button
                 type="button"
                 onClick={clearFile}
-                className="mt-3 text-sm text-red-600 hover:text-red-700"
+                className="mt-3 text-xs sm:text-sm text-danger-600 hover:text-danger-700 font-medium transition-colors"
               >
                 Remove
               </button>
@@ -207,17 +209,17 @@ const FileUpload: React.FC<FileUploadProps> = ({
 
       {uploading && (
         <div className="space-y-2">
-          <div className="flex justify-between text-sm">
-            <span className="text-gray-600">Uploading and processing...</span>
-            <span className="font-medium text-gray-900">{progress}%</span>
+          <div className="flex justify-between text-xs sm:text-sm">
+            <span className="text-navy-600">Uploading and processing...</span>
+            <span className="font-medium text-navy-900">{progress}%</span>
           </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
+          <div className="w-full bg-navy-100 rounded-full h-1.5 sm:h-2" role="progressbar" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100}>
             <div
-              className="bg-primary-600 h-2 rounded-full transition-all duration-300"
+              className="bg-primary-600 h-1.5 sm:h-2 rounded-full transition-all duration-300"
               style={{ width: `${progress}%` }}
-            ></div>
+            />
           </div>
-          <p className="text-xs text-gray-500">
+          <p className="text-2xs sm:text-xs text-navy-400">
             Please wait while we extract and analyze the prospectus...
           </p>
         </div>
@@ -226,7 +228,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
       {selectedFile && !uploading && (
         <button
           onClick={uploadFile}
-          className="w-full btn-primary py-3"
+          className="w-full btn-primary py-2.5 sm:py-3"
         >
           Upload and Process Prospectus
         </button>

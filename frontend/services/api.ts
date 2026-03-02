@@ -165,6 +165,24 @@ export const apiService = {
     return response.data;
   },
 
+  // Prospectus endpoints
+  async getProspectusSections(ipoId: number) {
+    const response = await apiClient.get(`/files/prospectus/${ipoId}/sections`);
+    return response.data;
+  },
+
+  async getProspectus(ipoId: number, includeContent = true) {
+    const response = await apiClient.get(`/files/prospectus/${ipoId}`, {
+      params: { include_content: includeContent },
+    });
+    return response.data;
+  },
+
+  async deleteProspectus(ipoId: number) {
+    const response = await apiClient.delete(`/files/prospectus/${ipoId}`);
+    return response.data;
+  },
+
   // Get active IPOs with retry
   async getActiveIPOs() {
     return requestWithRetry(async () => {

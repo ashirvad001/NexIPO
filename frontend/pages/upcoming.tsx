@@ -32,13 +32,11 @@ export default function UpcomingIPOs() {
 
   return (
     <Layout title="Upcoming IPOs - NexIPO">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="page-container">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-navy-900 mb-2">Upcoming IPOs</h1>
-          <p className="text-gray-600">
-            Opening soon
-          </p>
+        <div className="page-header">
+          <h1>Upcoming IPOs</h1>
+          <p>Opening soon</p>
         </div>
 
         {/* Content */}
@@ -47,20 +45,20 @@ export default function UpcomingIPOs() {
         ) : error ? (
           <Error message={error} retry={fetchIPOs} />
         ) : ipos.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="ipo-grid">
             {ipos.map((ipo) => (
               <IPOCard key={ipo.id} ipo={ipo} />
             ))}
           </div>
         ) : (
-          <div className="card text-center py-12">
-            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="empty-state">
+            <div className="empty-state-icon">
+              <svg className="w-7 h-7 text-navy-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
             </div>
             <h3 className="text-lg font-semibold text-navy-900 mb-2">No Upcoming IPOs</h3>
-            <p className="text-gray-600">Check back later for new IPO announcements.</p>
+            <p className="text-navy-500 text-sm">Check back later for new IPO announcements.</p>
           </div>
         )}
       </div>

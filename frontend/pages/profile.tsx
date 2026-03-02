@@ -57,7 +57,6 @@ export default function ProfilePage() {
         }
     }, [user]);
 
-    // Redirect to home if not logged in
     useEffect(() => {
         if (!user) {
             router.push('/');
@@ -67,8 +66,8 @@ export default function ProfilePage() {
     if (!user) {
         return (
             <Layout title="Profile - NexIPO">
-                <div className="max-w-4xl mx-auto px-4 py-12 text-center">
-                    <p className="text-gray-600">Please sign in to view your profile.</p>
+                <div className="page-container text-center">
+                    <p className="text-navy-500">Please sign in to view your profile.</p>
                 </div>
             </Layout>
         );
@@ -136,51 +135,51 @@ export default function ProfilePage() {
     const tabs = [
         {
             key: 'profile' as const, label: 'Profile', icon: (
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
             )
         },
         {
             key: 'security' as const, label: 'Security', icon: (
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
             )
         },
         {
             key: 'settings' as const, label: 'Settings', icon: (
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
             )
         },
     ];
 
     return (
         <Layout title="Profile - NexIPO">
-            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
 
                 {/* Profile Header */}
-                <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 sm:p-8 mb-6">
-                    <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
+                <div className="card p-5 sm:p-8 mb-6">
+                    <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6">
                         {/* Avatar */}
-                        <div className="w-20 h-20 bg-gradient-to-br from-primary-500 to-primary-700 rounded-full flex items-center justify-center ring-4 ring-primary-100">
-                            <span className="text-white font-bold text-3xl">
+                        <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-primary-500 to-primary-700 rounded-full flex items-center justify-center ring-4 ring-primary-100 flex-shrink-0">
+                            <span className="text-white font-bold text-2xl sm:text-3xl">
                                 {user.username[0].toUpperCase()}
                             </span>
                         </div>
 
                         {/* User Info */}
-                        <div className="flex-1 text-center sm:text-left">
-                            <h1 className="text-2xl font-bold text-gray-900">
+                        <div className="flex-1 text-center sm:text-left min-w-0">
+                            <h1 className="text-xl sm:text-2xl font-bold text-navy-900 truncate">
                                 {(user as any).full_name || user.username}
                             </h1>
-                            <p className="text-gray-500">@{user.username}</p>
-                            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 mt-3">
-                                <span className="inline-flex items-center gap-1 text-xs text-gray-500">
-                                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
-                                    {user.email}
+                            <p className="text-navy-500 text-sm">@{user.username}</p>
+                            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 sm:gap-3 mt-2 sm:mt-3">
+                                <span className="inline-flex items-center gap-1 text-xs text-navy-500">
+                                    <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                                    <span className="truncate max-w-[180px]">{user.email}</span>
                                 </span>
-                                <span className="inline-flex items-center gap-1 text-xs text-gray-500">
-                                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                                <span className="inline-flex items-center gap-1 text-xs text-navy-500">
+                                    <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                                     Joined {formatDate(user.created_at)}
                                 </span>
-                                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${user.role === 'admin' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'}`}>
+                                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${user.role === 'admin' ? 'bg-purple-100 text-purple-800' : 'bg-accent-100 text-accent-800'}`}>
                                     {user.role === 'admin' ? '👑 Admin' : '👤 User'}
                                 </span>
                             </div>
@@ -189,25 +188,28 @@ export default function ProfilePage() {
                         {/* Logout Button */}
                         <button
                             onClick={handleLogout}
-                            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors"
+                            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-danger-600 bg-danger-50 rounded-lg hover:bg-danger-100 transition-colors flex-shrink-0"
                         >
-                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                             </svg>
-                            Logout
+                            <span className="hidden xs:inline">Logout</span>
                         </button>
                     </div>
                 </div>
 
                 {/* Tabs */}
-                <div className="flex gap-2 mb-6 border-b border-gray-200 pb-0">
+                <div className="flex gap-1 sm:gap-2 mb-6 border-b border-navy-200 pb-0 overflow-x-auto" role="tablist" aria-label="Profile settings">
                     {tabs.map(tab => (
                         <button
                             key={tab.key}
                             onClick={() => setActiveTab(tab.key)}
-                            className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === tab.key
-                                    ? 'text-primary-600 border-primary-600'
-                                    : 'text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300'
+                            role="tab"
+                            aria-selected={activeTab === tab.key}
+                            aria-controls={`panel-${tab.key}`}
+                            className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-3 text-xs sm:text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${activeTab === tab.key
+                                ? 'text-primary-600 border-primary-600'
+                                : 'text-navy-500 border-transparent hover:text-navy-700 hover:border-navy-300'
                                 }`}
                         >
                             {tab.icon}
@@ -218,74 +220,79 @@ export default function ProfilePage() {
 
                 {/* Profile Tab */}
                 {activeTab === 'profile' && (
-                    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 sm:p-8">
-                        <h2 className="text-lg font-bold text-gray-900 mb-6">Edit Profile</h2>
+                    <div id="panel-profile" role="tabpanel" className="card p-5 sm:p-8 animate-fade-in">
+                        <h2 className="text-lg font-bold text-navy-900 mb-5 sm:mb-6">Edit Profile</h2>
 
                         {profileSuccess && (
-                            <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
-                                <p className="text-sm text-green-800 font-medium">✓ Profile updated successfully!</p>
+                            <div className="alert-success mb-4" role="status">
+                                <p>✓ Profile updated successfully!</p>
                             </div>
                         )}
                         {profileError && (
-                            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-                                <p className="text-sm text-red-800">{profileError}</p>
+                            <div className="alert-error mb-4" role="alert">
+                                <p>{profileError}</p>
                             </div>
                         )}
 
-                        <form onSubmit={handleProfileSubmit} className="space-y-5">
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        <form onSubmit={handleProfileSubmit} className="space-y-4 sm:space-y-5">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                                    <label htmlFor="profile-name" className="label">Full Name</label>
                                     <input
+                                        id="profile-name"
                                         type="text"
                                         value={profileForm.full_name}
                                         onChange={(e) => setProfileForm({ ...profileForm, full_name: e.target.value })}
-                                        className="input w-full"
+                                        className="input"
                                         placeholder="John Doe"
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                                    <label htmlFor="profile-phone" className="label">Phone</label>
                                     <input
+                                        id="profile-phone"
                                         type="tel"
                                         value={profileForm.phone}
                                         onChange={(e) => setProfileForm({ ...profileForm, phone: e.target.value })}
-                                        className="input w-full"
+                                        className="input"
                                         placeholder="+91 98765 43210"
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Company</label>
+                                    <label htmlFor="profile-company" className="label">Company</label>
                                     <input
+                                        id="profile-company"
                                         type="text"
                                         value={profileForm.company}
                                         onChange={(e) => setProfileForm({ ...profileForm, company: e.target.value })}
-                                        className="input w-full"
+                                        className="input"
                                         placeholder="Your company"
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Designation</label>
+                                    <label htmlFor="profile-designation" className="label">Designation</label>
                                     <input
+                                        id="profile-designation"
                                         type="text"
                                         value={profileForm.designation}
                                         onChange={(e) => setProfileForm({ ...profileForm, designation: e.target.value })}
-                                        className="input w-full"
+                                        className="input"
                                         placeholder="Software Engineer"
                                     />
                                 </div>
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Bio</label>
+                                <label htmlFor="profile-bio" className="label">Bio</label>
                                 <textarea
+                                    id="profile-bio"
                                     value={profileForm.bio}
                                     onChange={(e) => setProfileForm({ ...profileForm, bio: e.target.value })}
-                                    className="input w-full h-24 resize-none"
+                                    className="input h-24 resize-none"
                                     placeholder="Tell us about yourself..."
                                     maxLength={500}
                                 />
-                                <p className="text-xs text-gray-400 mt-1">{profileForm.bio.length}/500</p>
+                                <p className="text-xs text-navy-400 mt-1">{profileForm.bio.length}/500</p>
                             </div>
 
                             <div className="flex justify-end pt-2">
@@ -299,54 +306,60 @@ export default function ProfilePage() {
 
                 {/* Security Tab */}
                 {activeTab === 'security' && (
-                    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 sm:p-8">
-                        <h2 className="text-lg font-bold text-gray-900 mb-6">Change Password</h2>
+                    <div id="panel-security" role="tabpanel" className="card p-5 sm:p-8 animate-fade-in">
+                        <h2 className="text-lg font-bold text-navy-900 mb-5 sm:mb-6">Change Password</h2>
 
                         {passwordSuccess && (
-                            <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
-                                <p className="text-sm text-green-800 font-medium">✓ Password changed successfully!</p>
+                            <div className="alert-success mb-4" role="status">
+                                <p>✓ Password changed successfully!</p>
                             </div>
                         )}
                         {passwordError && (
-                            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-                                <p className="text-sm text-red-800">{passwordError}</p>
+                            <div className="alert-error mb-4" role="alert">
+                                <p>{passwordError}</p>
                             </div>
                         )}
 
-                        <form onSubmit={handlePasswordSubmit} className="space-y-5 max-w-md">
+                        <form onSubmit={handlePasswordSubmit} className="space-y-4 sm:space-y-5 max-w-md">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Current Password</label>
+                                <label htmlFor="sec-current" className="label">Current Password</label>
                                 <input
+                                    id="sec-current"
                                     type="password"
                                     value={passwordForm.current_password}
                                     onChange={(e) => setPasswordForm({ ...passwordForm, current_password: e.target.value })}
-                                    className="input w-full"
+                                    className="input"
                                     placeholder="••••••••"
                                     required
+                                    autoComplete="current-password"
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">New Password</label>
+                                <label htmlFor="sec-new" className="label">New Password</label>
                                 <input
+                                    id="sec-new"
                                     type="password"
                                     value={passwordForm.new_password}
                                     onChange={(e) => setPasswordForm({ ...passwordForm, new_password: e.target.value })}
-                                    className="input w-full"
+                                    className="input"
                                     placeholder="••••••••"
                                     minLength={8}
                                     required
+                                    autoComplete="new-password"
                                 />
-                                <p className="text-xs text-gray-500 mt-1">Minimum 8 characters</p>
+                                <p className="text-xs text-navy-400 mt-1">Minimum 8 characters</p>
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
+                                <label htmlFor="sec-confirm" className="label">Confirm New Password</label>
                                 <input
+                                    id="sec-confirm"
                                     type="password"
                                     value={passwordForm.confirm_new_password}
                                     onChange={(e) => setPasswordForm({ ...passwordForm, confirm_new_password: e.target.value })}
-                                    className="input w-full"
+                                    className="input"
                                     placeholder="••••••••"
                                     required
+                                    autoComplete="new-password"
                                 />
                             </div>
                             <div className="pt-2">
@@ -360,66 +373,66 @@ export default function ProfilePage() {
 
                 {/* Settings Tab */}
                 {activeTab === 'settings' && (
-                    <div className="space-y-6">
+                    <div id="panel-settings" role="tabpanel" className="space-y-6 animate-fade-in">
                         {/* Account Info */}
-                        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 sm:p-8">
-                            <h2 className="text-lg font-bold text-gray-900 mb-4">Account Information</h2>
-                            <div className="space-y-3">
-                                <div className="flex justify-between py-2 border-b border-gray-50">
-                                    <span className="text-sm text-gray-500">Email</span>
-                                    <span className="text-sm font-medium text-gray-900">{user.email}</span>
+                        <div className="card p-5 sm:p-8">
+                            <h2 className="text-lg font-bold text-navy-900 mb-4">Account Information</h2>
+                            <div className="space-y-0 divide-y divide-navy-100">
+                                <div className="flex flex-col xs:flex-row xs:justify-between py-3 gap-1">
+                                    <span className="text-sm text-navy-500">Email</span>
+                                    <span className="text-sm font-medium text-navy-900 truncate">{user.email}</span>
                                 </div>
-                                <div className="flex justify-between py-2 border-b border-gray-50">
-                                    <span className="text-sm text-gray-500">Username</span>
-                                    <span className="text-sm font-medium text-gray-900">@{user.username}</span>
+                                <div className="flex flex-col xs:flex-row xs:justify-between py-3 gap-1">
+                                    <span className="text-sm text-navy-500">Username</span>
+                                    <span className="text-sm font-medium text-navy-900">@{user.username}</span>
                                 </div>
-                                <div className="flex justify-between py-2 border-b border-gray-50">
-                                    <span className="text-sm text-gray-500">Role</span>
-                                    <span className="text-sm font-medium text-gray-900 capitalize">{user.role}</span>
+                                <div className="flex flex-col xs:flex-row xs:justify-between py-3 gap-1">
+                                    <span className="text-sm text-navy-500">Role</span>
+                                    <span className="text-sm font-medium text-navy-900 capitalize">{user.role}</span>
                                 </div>
-                                <div className="flex justify-between py-2 border-b border-gray-50">
-                                    <span className="text-sm text-gray-500">Account Status</span>
-                                    <span className={`text-sm font-medium ${user.is_active ? 'text-green-600' : 'text-red-600'}`}>
+                                <div className="flex flex-col xs:flex-row xs:justify-between py-3 gap-1">
+                                    <span className="text-sm text-navy-500">Account Status</span>
+                                    <span className={`text-sm font-medium ${user.is_active ? 'text-success-600' : 'text-danger-600'}`}>
                                         {user.is_active ? '● Active' : '○ Inactive'}
                                     </span>
                                 </div>
-                                <div className="flex justify-between py-2">
-                                    <span className="text-sm text-gray-500">Member Since</span>
-                                    <span className="text-sm font-medium text-gray-900">{formatDate(user.created_at)}</span>
+                                <div className="flex flex-col xs:flex-row xs:justify-between py-3 gap-1">
+                                    <span className="text-sm text-navy-500">Member Since</span>
+                                    <span className="text-sm font-medium text-navy-900">{formatDate(user.created_at)}</span>
                                 </div>
                             </div>
                         </div>
 
                         {/* Danger Zone */}
-                        <div className="bg-white rounded-2xl border border-red-200 shadow-sm p-6 sm:p-8">
-                            <h2 className="text-lg font-bold text-red-600 mb-2">Danger Zone</h2>
-                            <p className="text-sm text-gray-600 mb-4">
+                        <div className="card border-danger-200 p-5 sm:p-8">
+                            <h2 className="text-lg font-bold text-danger-600 mb-2">Danger Zone</h2>
+                            <p className="text-sm text-navy-500 mb-4">
                                 Once you delete your account, there is no going back. Please be certain.
                             </p>
 
                             {!showDeleteConfirm ? (
                                 <button
                                     onClick={() => setShowDeleteConfirm(true)}
-                                    className="px-4 py-2 text-sm font-medium text-red-600 border border-red-300 rounded-lg hover:bg-red-50 transition-colors"
+                                    className="px-4 py-2 text-sm font-medium text-danger-600 border border-danger-300 rounded-lg hover:bg-danger-50 transition-colors"
                                 >
                                     Delete Account
                                 </button>
                             ) : (
-                                <div className="bg-red-50 rounded-lg p-4">
-                                    <p className="text-sm text-red-800 font-medium mb-3">
+                                <div className="bg-danger-50 rounded-lg p-4">
+                                    <p className="text-sm text-danger-800 font-medium mb-3">
                                         Are you sure? This action will deactivate your account.
                                     </p>
-                                    <div className="flex gap-3">
+                                    <div className="flex flex-col xs:flex-row gap-3">
                                         <button
                                             onClick={handleDeleteAccount}
                                             disabled={deleteLoading}
-                                            className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors"
+                                            className="btn-danger"
                                         >
                                             {deleteLoading ? 'Deleting...' : 'Yes, Delete My Account'}
                                         </button>
                                         <button
                                             onClick={() => setShowDeleteConfirm(false)}
-                                            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                                            className="btn-secondary"
                                         >
                                             Cancel
                                         </button>

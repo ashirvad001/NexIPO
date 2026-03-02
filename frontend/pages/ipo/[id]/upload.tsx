@@ -80,7 +80,7 @@ export default function UploadProspectus() {
   if (error || !ipo) {
     return (
       <Layout>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="page-container">
           <Error message={error || 'IPO not found'} retry={fetchIPO} />
         </div>
       </Layout>
@@ -89,32 +89,33 @@ export default function UploadProspectus() {
 
   return (
     <Layout title={`Upload Prospectus - ${ipo.company_name}`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
+      <div className="page-container">
+        <div className="mb-6 sm:mb-8">
           <button
             onClick={() => router.push(`/ipo/${id}`)}
-            className="text-primary-600 hover:text-primary-700 mb-4 flex items-center gap-2"
+            className="text-primary-600 hover:text-primary-700 mb-4 flex items-center gap-1.5 text-sm transition-colors"
+            aria-label="Back to IPO details"
           >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
             Back to IPO Details
           </button>
 
-          <div className="flex items-start justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-navy-900 mb-1">
                 Prospectus Management
               </h1>
-              <p className="text-lg text-gray-600">{ipo.company_name}</p>
+              <p className="text-sm sm:text-base text-navy-500">{ipo.company_name}</p>
             </div>
-            
+
             {hasProspectus && (
               <button
                 onClick={handleDeleteProspectus}
-                className="btn-danger flex items-center gap-2"
+                className="btn-danger flex items-center gap-2 flex-shrink-0"
               >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
                 Delete Prospectus
@@ -124,32 +125,26 @@ export default function UploadProspectus() {
         </div>
 
         {uploadSuccess && (
-          <div className="mb-6 bg-green-50 border border-green-200 rounded-lg p-4">
-            <div className="flex items-center">
-              <svg className="w-5 h-5 text-green-600 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-              </svg>
-              <p className="text-sm font-medium text-green-800">
-                Prospectus uploaded and processed successfully!
-              </p>
-            </div>
+          <div className="alert-success mb-4 sm:mb-6 flex items-center gap-2" role="status">
+            <svg className="w-5 h-5 text-success-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+            </svg>
+            <p>Prospectus uploaded and processed successfully!</p>
           </div>
         )}
 
         {uploadError && (
-          <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
-            <div className="flex items-center">
-              <svg className="w-5 h-5 text-red-600 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-              </svg>
-              <p className="text-sm font-medium text-red-800">{uploadError}</p>
-            </div>
+          <div className="alert-error mb-4 sm:mb-6 flex items-center gap-2" role="alert">
+            <svg className="w-5 h-5 text-danger-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+            </svg>
+            <p>{uploadError}</p>
           </div>
         )}
 
         {!hasProspectus ? (
-          <div className="card max-w-2xl mx-auto">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">
+          <div className="card max-w-2xl mx-auto p-5 sm:p-8">
+            <h2 className="text-lg sm:text-xl font-semibold text-navy-900 mb-5 sm:mb-6">
               Upload Prospectus
             </h2>
             <FileUpload
@@ -157,11 +152,11 @@ export default function UploadProspectus() {
               onUploadSuccess={handleUploadSuccess}
               onUploadError={handleUploadError}
             />
-            <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-              <h3 className="text-sm font-medium text-blue-900 mb-2">
+            <div className="mt-5 sm:mt-6 p-3 sm:p-4 bg-accent-50 rounded-lg border border-accent-200">
+              <h3 className="text-xs sm:text-sm font-medium text-navy-900 mb-2">
                 What happens after upload?
               </h3>
-              <ul className="text-sm text-blue-700 space-y-1">
+              <ul className="text-xs sm:text-sm text-navy-600 space-y-1">
                 <li>• PDF file is validated and saved securely</li>
                 <li>• Text is extracted from all pages</li>
                 <li>• Key sections are automatically identified</li>
@@ -172,19 +167,13 @@ export default function UploadProspectus() {
           </div>
         ) : (
           <div>
-            <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <svg className="w-5 h-5 text-green-600 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  <p className="text-sm font-medium text-green-800">
-                    Prospectus available and processed
-                  </p>
-                </div>
-              </div>
+            <div className="alert-success mb-4 sm:mb-6 flex items-center gap-2" role="status">
+              <svg className="w-5 h-5 text-success-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+              <p>Prospectus available and processed</p>
             </div>
-            
+
             <ProspectusViewer ipoId={Number(id)} companyName={ipo.company_name} />
           </div>
         )}
