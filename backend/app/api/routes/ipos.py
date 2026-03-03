@@ -24,14 +24,17 @@ router = APIRouter(prefix="/ipos", tags=["IPOs"])
 async def sync_ipo_data(db: Session = Depends(get_db)):
     """
     Trigger a manual sync of real-time Indian IPO data.
-    Scrapes live data from Investorgain.com and upserts into the database.
+    Scrapes from IPO Central (listings + GMP) and Moneycontrol (detail pages).
     """
     try:
         summary = await sync_ipos(db)
         return {
             "status": "success",
-            "message": f"Synced {summary['total_scraped']} IPOs: "
-                       f"{summary['added']} added, {summary['updated']} updated",
+            "message": (
+                f"Synced {summary['total_scraped']} IPOs: "
+                f"{summary['added']} added, {summary['updated']} updated, "
+                f"{summary['enriched']} enriched from Moneycontrol"
+            ),
             "details": summary,
         }
     except Exception as e:

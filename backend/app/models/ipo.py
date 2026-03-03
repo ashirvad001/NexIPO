@@ -78,6 +78,10 @@ class IPO(Base):
     roe = Column(Float, nullable=True)   # Return on Equity
     revenue_growth = Column(Float, nullable=True)
     profit_growth = Column(Float, nullable=True)
+    face_value = Column(Float, nullable=True)
+    revenue_cr = Column(Float, nullable=True)   # Revenue in Crores
+    profit_cr = Column(Float, nullable=True)    # Profit in Crores
+    eps = Column(Float, nullable=True)          # Earnings Per Share
     
     # ML Risk Assessment
     risk_score = Column(Float, nullable=True, index=True)  # 0-100
@@ -92,7 +96,12 @@ class IPO(Base):
     # Additional Information
     lot_size = Column(Integer, nullable=True)
     min_investment = Column(Float, nullable=True)
+    detail_url = Column(String(500), nullable=True)        # Source-specific detail/review URL
     description = Column(Text, nullable=True)
+    
+    # Data Enrichment Tracking
+    data_source = Column(String(100), nullable=True)       # Which source populated data
+    last_enriched_at = Column(DateTime, nullable=True)     # When data was last enriched
     
     # Metadata
     created_at = Column(DateTime, server_default=func.now(), nullable=False)

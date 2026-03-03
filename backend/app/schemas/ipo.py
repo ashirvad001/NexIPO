@@ -59,6 +59,10 @@ class IPOBase(BaseModel):
     roe: Optional[float] = None
     revenue_growth: Optional[float] = None
     profit_growth: Optional[float] = None
+    face_value: Optional[float] = Field(None, ge=0)
+    revenue_cr: Optional[float] = None
+    profit_cr: Optional[float] = None
+    eps: Optional[float] = None
     
     prospectus_url: Optional[str] = Field(None, max_length=500)
     
@@ -112,6 +116,14 @@ class IPOUpdate(BaseModel):
     
     industry_sector: Optional[str] = Field(None, max_length=100)
     
+    face_value: Optional[float] = Field(None, ge=0)
+    revenue_cr: Optional[float] = None
+    profit_cr: Optional[float] = None
+    eps: Optional[float] = None
+    
+    fresh_issue_size: Optional[float] = Field(None, ge=0)
+    offer_for_sale: Optional[float] = Field(None, ge=0)
+    
     risk_score: Optional[float] = Field(None, ge=0, le=100)
     risk_category: Optional[str] = Field(None, max_length=20)
     
@@ -125,6 +137,8 @@ class IPOResponse(IPOBase):
     risk_category: Optional[str] = None
     ml_processed: bool = False
     ml_processed_at: Optional[datetime] = None
+    data_source: Optional[str] = None
+    last_enriched_at: Optional[datetime] = None
     created_at: datetime
     updated_at: datetime
     
