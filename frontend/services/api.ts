@@ -183,6 +183,17 @@ export const apiService = {
     return response.data;
   },
 
+  // RHP Downloads
+  async searchRHP(companyName: string) {
+    const response = await apiClient.get(`/files/rhp/search/${encodeURIComponent(companyName)}`);
+    return response.data;
+  },
+
+  async downloadRHP(ipoId: number) {
+    const response = await apiClient.post(`/files/rhp/download/${ipoId}`);
+    return response.data;
+  },
+
   // Get active IPOs with retry
   async getActiveIPOs() {
     return requestWithRetry(async () => {

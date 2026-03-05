@@ -1,5 +1,6 @@
 from sqlalchemy import Column, Integer, String, Float, DateTime, Text, Boolean, Enum as SQLEnum
 from sqlalchemy.sql import func
+from sqlalchemy.orm import relationship
 from datetime import datetime
 from enum import Enum
 from app.db.database import Base
@@ -106,6 +107,10 @@ class IPO(Base):
     # Metadata
     created_at = Column(DateTime, server_default=func.now(), nullable=False)
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
+    
+    # Relationships
+    gmp_history = relationship("GMPHistory", back_populates="ipo", cascade="all, delete-orphan")
+    news_and_announcements = Column(Text, nullable=True) # JSON array of text announcements
     
     def __repr__(self):
         return f"<IPO(id={self.id}, company={self.company_name}, status={self.status})>"

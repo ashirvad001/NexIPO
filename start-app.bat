@@ -16,6 +16,17 @@ REM ── Pre-flight checks ──
 echo  [CHECK] Verifying prerequisites...
 echo.
 
+REM ── Check for processes on port 3000 and 8000 ──
+echo  [INFO] Checking for existing processes on ports 3000 and 8000...
+for /f "tokens=5" %%a in ('netstat -aon ^| findstr :3000 ^| findstr LISTENING') do (
+    echo  [INFO] Killing process %%a on port 3000...
+    taskkill /F /PID %%a >nul 2>&1
+)
+for /f "tokens=5" %%a in ('netstat -aon ^| findstr :8000 ^| findstr LISTENING') do (
+    echo  [INFO] Killing process %%a on port 8000...
+    taskkill /F /PID %%a >nul 2>&1
+)
+
 python --version >nul 2>&1
 if %errorlevel% neq 0 (
     echo  [ERROR] Python is not installed or not in PATH.

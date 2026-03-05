@@ -1,7 +1,7 @@
-// components/IPOCard.tsx
 import React from 'react';
 import Link from 'next/link';
 import { IPO } from '@/types/ipo';
+import { useWebSocket } from '@/contexts/WebSocketContext';
 import {
   formatCrores,
   formatPercentage,
@@ -16,7 +16,16 @@ interface IPOCardProps {
   ipo: IPO;
 }
 
-const IPOCard: React.FC<IPOCardProps> = ({ ipo }) => {
+const IPOCard: React.FC<IPOCardProps> = ({ ipo: initialIpo }) => {
+  const { updates } = useWebSocket();
+  const liveUpdate = updates[initialIpo.id];
+
+  // Merge live WS data with initial REST data
+  const ipo = { ...initialIpo, ...liveUpdate };
+
+  // Use the timestamp trick to flash backgrounds on update
+  const hasRecentUpdate = liveUpdate && (Date.now() - liveUpdate._timestamp < 2000);
+
   const daysUntilOpen = getDaysUntil(ipo.open_date);
   const daysUntilClose = getDaysUntil(ipo.close_date);
 
@@ -70,16 +79,16 @@ const IPOCard: React.FC<IPOCardProps> = ({ ipo }) => {
               </p>
             </div>
           )}
-          {ipo.total_subscription && (
-            <div>
+          {ipo.total_subscription !== null && ipo.total_subscription !== undefined && (
+            <div className={`transition-colors duration-1000 rounded px-1 -ml-1 ${hasRecentUpdate && liveUpdate?.type === 'subscription_update' ? 'bg-success-100/50' : ''}`}>
               <p className="text-2xs sm:text-xs text-navy-400 mb-0.5">Subscription</p>
               <p className="text-xs sm:text-sm font-semibold text-success-600">
                 {formatSubscription(ipo.total_subscription)}
               </p>
             </div>
           )}
-          {ipo.gmp_percentage && (
-            <div>
+          {ipo.gmp_percentage !== null && ipo.gmp_percentage !== undefined && (
+            <div className={`transition-colors duration-1000 rounded px-1 -ml-1 ${hasRecentUpdate && liveUpdate?.type === 'gmp_update' ? 'bg-success-100/50' : ''}`}>
               <p className="text-2xs sm:text-xs text-navy-400 mb-0.5">GMP</p>
               <p className={`text-xs sm:text-sm font-semibold ${ipo.gmp_percentage > 0 ? 'text-success-600' : 'text-danger-600'}`}>
                 {formatPercentage(ipo.gmp_percentage)}
@@ -142,14 +151,23 @@ const IPOCard: React.FC<IPOCardProps> = ({ ipo }) => {
           </div>
         )}
 
-        {/* Listing Gain (for listed IPOs) */}
-        {ipo.status === 'listed' && ipo.listing_gain_percentage !== null && (
+        {/* Current Price / Listing Gain (for listed IPOs) */}
+        {ipo.status === 'listed' && (
           <div className="border-t border-navy-100 pt-3 mt-3">
-            <div className="flex items-center justify-between">
-              <span className="text-2xs sm:text-xs text-navy-500">Listing Gain</span>
-              <span className={`text-xs sm:text-sm font-semibold ${ipo.listing_gain_percentage > 0 ? 'text-success-600' : 'text-danger-600'}`}>
-                {formatPercentage(ipo.listing_gain_percentage)}
-              </span>
+            <div className={`flex items-center justify-between rounded px-1 -ml-1 transition-colors duration-1000 ${hasRecentUpdate && liveUpdate?.type === 'price_update' ? 'bg-success-100/50' : ''}`}>
+              <span className="text-2xs sm:text-xs text-navy-500">Live Price / Gain</span>
+              <div className="text-right">
+                {ipo.current_price && (
+                  <span className="text-xs sm:text-sm font-bold text-navy-900 mr-2">
+                    ₹{ipo.current_price.toLocaleString('en-IN')}
+                  </span>
+                )}
+                {ipo.listing_gain_percentage !== null && ipo.listing_gain_percentage !== undefined && (
+                  <span className={`text-xs sm:text-sm font-semibold ${ipo.listing_gain_percentage > 0 ? 'text-success-600' : 'text-danger-600'}`}>
+                    {formatPercentage(ipo.listing_gain_percentage)}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
         )}

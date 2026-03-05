@@ -211,3 +211,71 @@ async def get_file_metadata(file_id: str):
         )
     
     return metadata
+
+# -------------------------------------------------------------
+# RHP Automated Downloads & Viewing
+# -------------------------------------------------------------
+import os
+from . import * # satisfy linter, implicit
+
+@router.get("/rhp/search/{company_name}")
+async def search_rhp_online(company_name: str):
+    """
+    Search for RHP online and return download links directly 
+    (Placeholder format in case we want to stream straight link vs scrape)
+    """
+    from app.services.rhp_downloader import RHPDownloader
+    downloader = RHPDownloader()
+    
+    # Just try Chittorgarh search for now to see if we find a link
+    search_query = company_name.replace(" ", "+")
+    search_url = f"https://www.chittorgarh.com/search.asp?q={search_query}"
+    
+    return {
+        "success": True,
+        "search_url": search_url,
+        "message": "Direct link extraction requires full download flow currently. Call /rhp/download."
+    }
+
+@router.post("/rhp/download/{ipo_id}")
+async def download_rhp_for_ipo(
+    ipo_id: int,
+    db: Session = Depends(get_db)
+):
+    """
+    Automatically download RHP from online sources
+    """
+    ipo = IPOService.get_ipo_by_id(db, ipo_id)
+    if not ipo:
+        raise HTTPException(status_code=404, detail="IPO not found")
+        
+    from app.services.rhp_downloader import RHPDownloader
+    downloader = RHPDownloader()
+    
+    download_dir = os.path.join(os.getcwd(), "tmp_downloads")
+    os.makedirs(download_dir, exist_ok=True)
+    
+    result = await downloader.process_ipo(ipo, download_dir)
+    return result
+
+@router.get("/rhp/view/{ipo_id}")
+async def view_rhp(
+    ipo_id: int,
+    db: Session = Depends(get_db)
+):
+    """
+    Return RHP PDF with inline disposition for in-browser viewing
+    """
+    ipo = IPOService.get_ipo_by_id(db, ipo_id)
+    if not ipo or not ipo.prospectus_file_id:
+        raise HTTPException(status_code=404, detail="Prospectus not found for this IPO")
+        
+    file_path = FileService.get_file_path(ipo.prospectus_file_id)
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail="File on disk missing")
+        
+    return FileResponse(
+        path=file_path,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f"inline; filename={ipo.symbol or ipo.company_name}_RHP.pdf"}
+    )

@@ -3,8 +3,10 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Layout from '@/components/Layout';
 import Loading from '@/components/Loading';
+import RHPViewer from '@/components/RHPViewer';
 import { apiService } from '@/services/api';
 import { IPO } from '@/types/ipo';
+import { useWebSocket } from '@/contexts/WebSocketContext';
 
 function formatDate(dateStr: string | null): string {
   if (!dateStr) return '—';
@@ -170,12 +172,18 @@ function VerdictGauge({ score, label, color }: { score: number; label: string; c
 export default function IPODetailPage() {
   const router = useRouter();
   const { id } = router.query;
-  const [ipo, setIPO] = useState<IPO | null>(null);
+  const [initialIpo, setInitialIpo] = useState<IPO | null>(null);
   const [analysis, setAnalysis] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [analysisLoading, setAnalysisLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'pros' | 'cons' | 'risks'>('pros');
   const [error, setError] = useState<string | null>(null);
+
+  const { updates } = useWebSocket();
+  const liveUpdate = id ? updates[Number(id)] : null;
+
+  // Merge live WS data with REST data
+  const ipo = initialIpo ? { ...initialIpo, ...liveUpdate } : null;
+  const hasRecentUpdate = liveUpdate && (Date.now() - liveUpdate._timestamp < 2000);
 
   useEffect(() => {
     if (id) {
@@ -191,7 +199,7 @@ export default function IPODetailPage() {
         apiService.getIPOById(Number(id)),
         apiService.getIPOAnalysis(Number(id)).catch(() => null),
       ]);
-      setIPO(data);
+      setInitialIpo(data);
       setAnalysis(analysisData);
     } catch (err: any) {
       setError(err.response?.data?.detail || err.message || 'Failed to load IPO');
@@ -274,7 +282,7 @@ export default function IPODetailPage() {
 
             {/* GMP Highlight */}
             {ipo.gmp_amount != null && (
-              <div className={`flex-shrink-0 rounded-xl p-3 sm:p-4 text-center ${ipo.gmp_amount >= 0 ? 'bg-success-50 border border-success-200' : 'bg-danger-50 border border-danger-200'}`}>
+              <div className={`flex-shrink-0 rounded-xl p-3 sm:p-4 text-center transition-colors duration-1000 ${hasRecentUpdate && liveUpdate?.type === 'gmp_update' ? 'bg-success-100 border-success-400' : (ipo.gmp_amount >= 0 ? 'bg-success-50 border border-success-200' : 'bg-danger-50 border border-danger-200')}`}>
                 <p className="text-2xs sm:text-xs font-semibold text-navy-500 uppercase tracking-wide mb-1">GMP</p>
                 <GmpIndicator gmp={ipo.gmp_amount} percentage={ipo.gmp_percentage} />
                 {ipo.estimated_listing_price && (
@@ -309,6 +317,15 @@ export default function IPODetailPage() {
               <p className="text-sm sm:text-lg font-bold text-navy-900">{formatCurrency(ipo.min_investment)}</p>
             </div>
           </div>
+          {ipo.current_price && (
+            <div className={`mt-4 pt-4 border-t border-navy-100 flex items-center justify-between rounded px-2 transition-colors duration-1000 ${hasRecentUpdate && liveUpdate?.type === 'price_update' ? 'bg-success-100' : ''}`}>
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 bg-success-500 rounded-full animate-pulse" />
+                <span className="text-xs font-semibold text-navy-600 uppercase">Live Market Price</span>
+              </div>
+              <span className="text-lg sm:text-xl font-bold text-navy-900">{formatCurrency(ipo.current_price)}</span>
+            </div>
+          )}
         </div>
 
         {/* ═══ ANALYSIS SECTION ═══ */}
@@ -449,7 +466,7 @@ export default function IPODetailPage() {
             <InfoCard title="Subscription Status"
               icon={<svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>}
             >
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 sm:gap-x-8">
+              <div className={`grid grid-cols-1 sm:grid-cols-2 gap-x-6 sm:gap-x-8 transition-colors duration-1000 rounded p-2 ${hasRecentUpdate && liveUpdate?.type === 'subscription_update' ? 'bg-success-50' : ''}`}>
                 <div>
                   <SubscriptionBar label="QIB (Institutional)" value={ipo.qib_subscription} color="bg-accent-500" />
                   <SubscriptionBar label="NII (HNI)" value={ipo.nii_subscription} color="bg-purple-500" />
@@ -484,6 +501,13 @@ export default function IPODetailPage() {
             </InfoCard>
           </div>
         )}
+
+        {/* ═══ RHP VIEWER SECTION ═══ */}
+        <RHPViewer
+          ipoId={ipo.id}
+          companyName={ipo.company_name}
+          hasProspectusInitially={!!ipo.prospectus_file_id}
+        />
 
         {/* Footer */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mt-6 sm:mt-8">
