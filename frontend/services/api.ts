@@ -124,6 +124,17 @@ export const apiService = {
     await apiClient.delete(`/ipos/${id}`);
   },
 
+  async bulkImportIPOs(file: File) {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await apiClient.post('/ipos/bulk-import', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+
   // ML endpoints - Phase 5
   async predictRisk(ipoId: number) {
     const response = await apiClient.post(`/ml/predict/${ipoId}`);

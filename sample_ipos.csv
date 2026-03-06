@@ -1,0 +1,4 @@
+company_name,symbol,status,open_date,close_date,price_band_lower,price_band_upper,issue_size_rs_cr,lot_size,min_investment,industry_sector,ipo_type
+TechVision India Ltd,TECHVISION,open,2026-03-09,2026-03-11,116,122,255,123,15006,Information Technology,mainboard
+FutureLogic Systems,FUTURELOGIC,upcoming,2026-03-15,2026-03-18,250,265,500,50,13250,Software,mainboard
+EcoEnergy Solutions,ECOENERGY,closed,2026-02-10,2026-02-12,45,50,120,300,15000,Renewable Energy,sme

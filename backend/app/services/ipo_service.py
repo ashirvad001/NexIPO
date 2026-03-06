@@ -211,6 +211,25 @@ class IPOService:
         ).order_by(IPO.open_date.asc()).limit(limit).all()
     
     @staticmethod
+    def bulk_create_ipos(db: Session, ipos_data: List[IPOCreate]) -> List[IPO]:
+        """
+        Create multiple IPO entries in a single transaction.
+        
+        Args:
+            db: Database session
+            ipos_data: List of IPO creation data objects
+            
+        Returns:
+            List of created IPO objects
+        """
+        db_ipos = [IPO(**data.model_dump()) for data in ipos_data]
+        db.add_all(db_ipos)
+        db.commit()
+        for ipo in db_ipos:
+            db.refresh(ipo)
+        return db_ipos
+
+    @staticmethod
     def update_ml_risk_score(
         db: Session,
         ipo_id: int,

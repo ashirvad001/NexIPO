@@ -15,6 +15,9 @@ from app.schemas.ipo import (
 )
 from app.services.ipo_service import IPOService
 from app.services.ipo_scraper import sync_ipos
+import pandas as pd
+import io
+from fastapi import UploadFile, File
 from app.services.ipo_analyzer import analyze_ipo
 
 router = APIRouter(prefix="/ipos", tags=["IPOs"])
@@ -41,6 +44,77 @@ async def sync_ipo_data(db: Session = Depends(get_db)):
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Sync failed: {str(e)}",
+        )
+
+@router.post("/bulk-import", tags=["IPOs"])
+async def bulk_import_ipos(
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db)
+):
+    """
+    Import IPOs from CSV or Excel files.
+    Validates data against IPOCreate schema and returns an import report.
+    """
+    try:
+        content = await file.read()
+        filename = file.filename.lower()
+        
+        if filename.endswith('.csv'):
+            df = pd.read_csv(io.BytesIO(content))
+        elif filename.endswith(('.xls', '.xlsx')):
+            df = pd.read_excel(io.BytesIO(content))
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Unsupported file format. Please upload CSV or Excel (.xlsx/.xls)."
+            )
+
+        # Replace NaN with None for Pydantic validation
+        df = df.where(pd.notnull(df), None)
+        
+        success_count = 0
+        failure_count = 0
+        errors = []
+        valid_ipos = []
+        
+        for index, row in df.iterrows():
+            try:
+                row_dict = row.to_dict()
+                # Basic normalization: ensure string types where expected, handle dates if they are already datetime objects from pandas
+                for key, value in row_dict.items():
+                    if isinstance(value, pd.Timestamp):
+                        row_dict[key] = value.to_pydatetime()
+                
+                # Simple validation using IPOCreate
+                ipo_data = IPOCreate(**row_dict)
+                valid_ipos.append(ipo_data)
+                success_count += 1
+            except Exception as e:
+                failure_count += 1
+                errors.append({
+                    "row": index + 2, # +2 for 1-indexing and header
+                    "company": str(row.get('company_name', 'Unknown')),
+                    "error": str(e)
+                })
+        
+        if valid_ipos:
+            IPOService.bulk_create_ipos(db, valid_ipos)
+            
+        return {
+            "status": "success" if failure_count == 0 else "partial_success",
+            "message": f"Import complete: {success_count} success, {failure_count} failures.",
+            "report": {
+                "total_rows": len(df),
+                "success": success_count,
+                "failed": failure_count,
+                "errors": errors
+            }
+        }
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Import failed: {str(e)}"
         )
 
 

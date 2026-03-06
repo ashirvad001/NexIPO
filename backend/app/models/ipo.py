@@ -49,6 +49,9 @@ class IPO(Base):
     issue_price = Column(Float, nullable=True)
     listing_price = Column(Float, nullable=True)
     current_price = Column(Float, nullable=True)
+    return_1d = Column(Float, nullable=True)
+    return_1w = Column(Float, nullable=True)
+    return_1m = Column(Float, nullable=True)
     
     # Issue Size
     issue_size_rs_cr = Column(Float, nullable=True)  # in Crores

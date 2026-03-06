@@ -3,6 +3,7 @@ import Layout from '@/components/Layout';
 import IPOCard from '@/components/IPOCard';
 import Loading from '@/components/Loading';
 import Error from '@/components/Error';
+import BulkImport from '@/components/BulkImport';
 import { apiService } from '@/services/api';
 import { IPO, IPOListResponse, IPOStatus, IPOType } from '@/types/ipo';
 
@@ -10,6 +11,7 @@ export default function AllIPOs() {
   const [data, setData] = useState<IPOListResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showBulkImport, setShowBulkImport] = useState(false);
 
   // Filter states
   const [status, setStatus] = useState<IPOStatus | ''>('');
@@ -70,10 +72,32 @@ export default function AllIPOs() {
     <Layout title="All IPOs - NexIPO">
       <div className="page-container">
         {/* Header */}
-        <div className="page-header">
-          <h1>All IPOs</h1>
-          <p>{data ? `Showing ${data.items.length} of ${data.total} IPOs` : 'Browse all IPOs'}</p>
+        <div className="page-header flex justify-between items-center">
+          <div>
+            <h1>All IPOs</h1>
+            <p>{data ? `Showing ${data.items.length} of ${data.total} IPOs` : 'Browse all IPOs'}</p>
+          </div>
+          <button
+            onClick={() => setShowBulkImport(true)}
+            className="btn-secondary flex items-center gap-2"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+            </svg>
+            Bulk Import
+          </button>
         </div>
+
+        {showBulkImport && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-navy-900/60 backdrop-blur-sm">
+            <div className="w-full max-w-2xl" onClick={(e) => e.stopPropagation()}>
+              <BulkImport
+                onSuccess={() => fetchIPOs()}
+                onClose={() => setShowBulkImport(false)}
+              />
+            </div>
+          </div>
+        )}
 
         {/* Filters */}
         <div className="card mb-6 sm:mb-8">
