@@ -283,9 +283,10 @@ async def scrape_homepage() -> list[dict]:
     return results
 
 
-async def scrape_gmp_data() -> dict[str, dict]:
-    """Scrape GMP data from ipocentral.in/ipo-discussion/."""
-    html = await _fetch_page(IPOCENTRAL_GMP)
+async def scrape_investorgain_gmp() -> dict[str, dict]:
+    """Scrape GMP data from investorgain.com as fallback."""
+    url = "https://www.investorgain.com/report/live-ipo-gmp/331/"
+    html = await _fetch_page(url)
     if not html:
         return {}
 
@@ -293,37 +294,118 @@ async def scrape_gmp_data() -> dict[str, dict]:
     tables = soup.find_all("table")
     results = {}
 
-    for table in tables[:2]:
-        rows = table.find_all("tr")
+    target_table = None
+    for table in tables:
+        header_row = table.find('tr')
+        if header_row:
+            headers = [th.get_text(strip=True).lower() for th in header_row.find_all(['th', 'td'])]
+            if 'gmp' in headers and 'name' in headers:
+                target_table = table
+                break
+    
+    if not target_table and tables:
+        target_table = tables[0]
+
+    if target_table:
+        header_row = target_table.find('tr')
+        headers = [th.get_text(strip=True).lower() for th in header_row.find_all(['th', 'td'])]
+        
+        try:
+            name_idx = headers.index('name')
+            gmp_idx = headers.index('gmp')
+            price_idx = next((i for i, h in enumerate(headers) if 'price' in h), -1)
+        except (ValueError, StopIteration):
+            name_idx, gmp_idx, price_idx = 0, 1, 4 # Fallback defaults
+
+        rows = target_table.find_all("tr")
         for row in rows[1:]:
             cells = row.find_all(["td", "th"])
-            if len(cells) < 4:
+            if len(cells) <= max(name_idx, gmp_idx):
                 continue
 
-            raw_name = cells[0].get_text(strip=True)
+            raw_name = cells[name_idx].get_text(strip=True)
             if not raw_name:
                 continue
 
             company_name = re.sub(r"\(.*?\)\s*$", "", raw_name).strip()
-            if not company_name or len(company_name) < 3:
-                continue
+            # Clean "IPO" and "Limited" etc for matching
+            norm_name = _normalize_name(company_name)
 
-            price = _parse_float(cells[1].get_text(strip=True))
-            gmp = _parse_float(cells[2].get_text(strip=True))
-            gmp_pct = _parse_float(cells[3].get_text(strip=True))
+            gmp_text = cells[gmp_idx].get_text(strip=True)
+            # Handle "₹ 45 (10%)"
+            gmp_match = re.search(r'-?\d+\.?\d*', gmp_text.replace(',', ''))
+            gmp = float(gmp_match.group(0)) if gmp_match else None
+            
+            price = None
+            if price_idx != -1 and len(cells) > price_idx:
+                price = _parse_float(cells[price_idx].get_text(strip=True))
 
             gmp_data = {}
             if gmp is not None:
                 gmp_data["gmp_amount"] = gmp
-            if gmp_pct is not None:
-                gmp_data["gmp_percentage"] = gmp_pct
-            if price and gmp is not None:
-                gmp_data["estimated_listing_price"] = price + gmp
+                if price:
+                    gmp_data["gmp_percentage"] = round((gmp / price) * 100, 2)
+                    gmp_data["estimated_listing_price"] = price + gmp
 
             if gmp_data:
-                results[_normalize_name(company_name)] = gmp_data
+                results[norm_name] = gmp_data
 
-    logger.info(f"Scraped GMP data for {len(results)} IPOs")
+    logger.info(f"Scraped InvestorGain GMP data for {len(results)} IPOs")
+    return results
+
+
+async def scrape_gmp_data() -> dict[str, dict]:
+    """Scrape GMP data from ipocentral.in/ipo-discussion/ with InvestorGain fallback."""
+    html = await _fetch_page(IPOCENTRAL_GMP)
+    results = {}
+    
+    if html:
+        soup = BeautifulSoup(html, "html.parser")
+        tables = soup.find_all("table")
+
+        for table in tables[:2]:
+            rows = table.find_all("tr")
+            for row in rows[1:]:
+                cells = row.find_all(["td", "th"])
+                if len(cells) < 4:
+                    continue
+
+                raw_name = cells[0].get_text(strip=True)
+                if not raw_name:
+                    continue
+
+                company_name = re.sub(r"\(.*?\)\s*$", "", raw_name).strip()
+                if not company_name or len(company_name) < 3:
+                    continue
+
+                price = _parse_float(cells[1].get_text(strip=True))
+                gmp = _parse_float(cells[2].get_text(strip=True))
+                gmp_pct = _parse_float(cells[3].get_text(strip=True))
+
+                gmp_data = {}
+                if gmp is not None:
+                    gmp_data["gmp_amount"] = gmp
+                if gmp_pct is not None:
+                    gmp_data["gmp_percentage"] = gmp_pct
+                if price and gmp is not None:
+                    gmp_data["estimated_listing_price"] = price + gmp
+
+                if gmp_data:
+                    results[_normalize_name(company_name)] = gmp_data
+
+        logger.info(f"Scraped IPOCentral GMP data for {len(results)} IPOs")
+
+    # Merge with InvestorGain as fallback/supplement
+    ig_results = await scrape_investorgain_gmp()
+    for name, data in ig_results.items():
+        if name not in results:
+            results[name] = data
+        else:
+            # Optionally update missing fields
+            for k, v in data.items():
+                if k not in results[name] or results[name][k] is None:
+                    results[name][k] = v
+
     return results
 
 

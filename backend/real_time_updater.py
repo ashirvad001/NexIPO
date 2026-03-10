@@ -175,18 +175,42 @@ class RealTimeUpdater:
                     
                     gmp_scraped = {}
                     if tables:
-                        rows = tables[0].find_all('tr')[1:] # skip header
+                        # Robust table selection: Find table with 'GMP' and 'Name' in headers
+                        target_table = None
+                        for table in tables:
+                            header_row = table.find('tr')
+                            if header_row:
+                                headers = [th.get_text(strip=True).lower() for th in header_row.find_all(['th', 'td'])]
+                                if 'gmp' in headers and 'name' in headers:
+                                    target_table = table
+                                    break
+                        
+                        if not target_table:
+                            target_table = tables[0] # Fallback
+                            
+                        rows = target_table.find_all('tr')[1:] # skip header
                         for row in rows:
                             cols = row.find_all('td')
-                            if len(cols) > 5:
+                            if len(cols) > 4:
+                                # Index 0: Name, Index 1: GMP, Index 4: Price
                                 name_cell = cols[0].get_text(strip=True)
                                 # Clean name
-                                clean_name = name_cell.replace('IPO', '').strip().lower()
+                                clean_name = name_cell.replace('IPO', '').replace('Limited', '').replace('Ltd', '').strip().lower()
                                 
-                                gmp_cell = cols[4].get_text(strip=True)
+                                gmp_cell = cols[1].get_text(strip=True)
                                 try:
-                                    # Handle "₹ 45" or similar
-                                    gmp_val = float(''.join(c for c in gmp_cell if c.isdigit() or c == '.'))
+                                    # Extract number from "₹ 45 (10%)" or similar
+                                    # Handle negative or zero
+                                    if 'fixed' in gmp_cell.lower() or '--' in gmp_cell:
+                                        gmp_val = 0.0
+                                    else:
+                                        # Match potential decimal or integer
+                                        match = re.search(r'₹?\s*(-?\d+\.?\d*)', gmp_cell)
+                                        if match:
+                                            gmp_val = float(match.group(1))
+                                        else:
+                                            gmp_val = 0.0
+                                    
                                     gmp_scraped[clean_name] = gmp_val
                                 except:
                                     pass
