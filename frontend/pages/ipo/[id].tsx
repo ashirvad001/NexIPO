@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 import Layout from '@/components/Layout';
 import Loading from '@/components/Loading';
 import RHPViewer from '@/components/RHPViewer';
+import VolatilityForecast from '@/components/VolatilityForecast';
 import { apiService } from '@/services/api';
 import { IPO } from '@/types/ipo';
 import { useWebSocket } from '@/contexts/WebSocketContext';
@@ -409,6 +410,15 @@ export default function IPODetailPage() {
             </div>
           </div>
         )}
+
+        {/* Volatility Forecast Component */}
+        <div className="mb-5 sm:mb-6">
+          <VolatilityForecast 
+            ipoId={ipo.id}
+            symbol={ipo.symbol || ''}
+            companyName={ipo.company_name}
+          />
+        </div>
 
         {/* Details Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-5 sm:mb-6">

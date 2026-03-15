@@ -54,6 +54,15 @@ if not exist "%ROOT%backend\venv\Scripts\activate.bat" (
 )
 echo  [OK] Backend venv found
 
+REM ── Check backend .env ──
+if not exist "%ROOT%backend\.env" (
+    echo  [ERROR] Backend .env file missing in %ROOT%backend
+    echo          Please create one based on .env.example
+    pause
+    exit /b 1
+)
+echo  [OK] Backend .env found
+
 REM ── Check frontend node_modules ──
 if not exist "%ROOT%frontend\node_modules" (
     echo  [INFO] Frontend dependencies not installed. Installing...
@@ -63,18 +72,18 @@ echo  [OK] Frontend dependencies ready
 echo.
 
 REM ── Step 1: Start Backend ──
-echo  [STEP 1/2] Starting Backend API (FastAPI + Uvicorn)...
-start "NexIPO Backend" cmd /k "cd /d "%ROOT%backend" && call venv\Scripts\activate.bat && python main.py"
-echo           Waiting for backend to initialize...
-timeout /t 6 /nobreak >nul
+echo  [STEP 1/2] Starting NexIPO Backend API...
+start "NexIPO API Server" cmd /k "cd /d "%ROOT%backend" && call venv\Scripts\activate.bat && python main.py"
+echo           Waiting for backend to initialize (approx 8s)...
+timeout /t 8 /nobreak >nul
 echo           Backend should be live at http://localhost:8000
 echo.
 
 REM ── Step 2: Start Frontend ──
-echo  [STEP 2/2] Starting Frontend (Next.js)...
-start "NexIPO Frontend" cmd /k "cd /d "%ROOT%frontend" && npm run dev"
+echo  [STEP 2/2] Starting NexIPO Frontend UI...
+start "NexIPO Web Frontend" cmd /k "cd /d "%ROOT%frontend" && npm run dev"
 echo           Waiting for frontend to compile...
-timeout /t 5 /nobreak >nul
+timeout /t 6 /nobreak >nul
 echo           Frontend should be live at http://localhost:3000
 echo.
 
@@ -99,4 +108,4 @@ echo.
 echo   To stop: press Ctrl+C in each terminal window.
 echo  =============================================
 echo.
-pause
+exit /b 0

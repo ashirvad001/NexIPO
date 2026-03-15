@@ -9,7 +9,7 @@ import time
 
 from app.core.config import get_settings
 from app.db.database import Base, engine
-from app.api.routes import ipos, files, ml, auth
+from app.api.routes import ipos, files, ml, auth, volatility
 from app.api import websockets
 
 settings = get_settings()
@@ -172,6 +172,7 @@ app.include_router(files.router, prefix=settings.API_V1_PREFIX)
 app.include_router(ml.router, prefix=settings.API_V1_PREFIX)
 app.include_router(auth.router, prefix=settings.API_V1_PREFIX)
 app.include_router(websockets.router, prefix=settings.API_V1_PREFIX)
+app.include_router(volatility.router, prefix=settings.API_V1_PREFIX)
 
 
 async def _background_ipo_sync():

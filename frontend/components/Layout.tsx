@@ -252,46 +252,58 @@ const Layout: React.FC<LayoutProps> = ({
         </main>
 
         {/* ─── Footer ─── */}
-        <footer className="bg-navy-900 mt-auto" role="contentinfo">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8">
-              <div>
-                <h3 className="text-sm font-semibold text-white mb-3">About</h3>
-                <p className="text-sm text-navy-300 leading-relaxed">
-                  ML-powered platform for IPO analysis and risk assessment. Built for placements and final year projects.
+        <footer className="bg-navy-950 border-t border-navy-800 py-12" role="contentinfo">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
+              <div className="max-w-sm">
+                <Link href="/" className="flex items-center space-x-2 mb-4">
+                  <Image
+                    src="/logo.png"
+                    alt="NexIPO Logo"
+                    width={28}
+                    height={28}
+                    className="rounded-lg"
+                  />
+                  <span className="text-2xl font-black text-white tracking-tighter">
+                    Nex<span className="text-primary-400">IPO</span>
+                  </span>
+                </Link>
+                <p className="text-sm text-navy-400 leading-relaxed">
+                  Advanced ML-powered platform for retail IPO intelligence and deep-dive risk assessment.
                 </p>
               </div>
-              <div>
-                <h3 className="text-sm font-semibold text-white mb-3">Quick Links</h3>
-                <ul className="space-y-2">
-                  {navItems.map((item) => (
-                    <li key={item.href}>
-                      <Link href={item.href} className="text-sm text-navy-300 hover:text-primary-400 transition-colors">
-                        {item.label}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div>
-                <h3 className="text-sm font-semibold text-white mb-3">Technology</h3>
-                <p className="text-sm text-navy-300">
-                  Next.js • TypeScript • FastAPI • PostgreSQL • Machine Learning
-                </p>
+
+              <div className="flex flex-wrap gap-x-12 gap-y-6">
+                <div>
+                  <h3 className="text-xs font-bold text-navy-500 uppercase tracking-[0.2em] mb-4">Explore</h3>
+                  <ul className="grid grid-cols-2 gap-x-8 gap-y-2">
+                    {navItems.map((item) => (
+                      <li key={item.href}>
+                        <Link href={item.href} className="text-sm text-navy-300 hover:text-white transition-colors">
+                          {item.label}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                
+                <div className="hidden sm:block w-px h-16 bg-navy-800 self-center"></div>
+
+                <div className="max-w-[240px]">
+                  <h3 className="text-xs font-bold text-navy-500 uppercase tracking-[0.2em] mb-4">Project Note</h3>
+                  <p className="text-[11px] text-navy-500 leading-tight italic">
+                    Academic Research Initiative v1.0 • Built for institutional-grade volatility forecasting and NLP analysis.
+                  </p>
+                </div>
               </div>
             </div>
-            <div className="mt-8 pt-6 border-t border-navy-700">
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-2">
-                <Image
-                  src="/logo.png"
-                  alt="NexIPO Logo"
-                  width={20}
-                  height={20}
-                  className="rounded"
-                />
-                <p className="text-sm text-navy-400">
-                  © {new Date().getFullYear()} NexIPO. Built for educational purposes.
-                </p>
+
+            <div className="mt-12 pt-8 border-t border-navy-900 flex flex-col sm:flex-row justify-between items-center gap-4">
+              <p className="text-xs text-navy-600 font-medium tracking-wide">
+                © {new Date().getFullYear()} NexIPO Intelligence. All rights reserved.
+              </p>
+              <div className="flex items-center gap-6">
+                <span className="px-2 py-0.5 rounded bg-primary-950/20 text-[10px] font-bold text-primary-500/80 border border-primary-500/10">STABLE v3.1</span>
               </div>
             </div>
           </div>

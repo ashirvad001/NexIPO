@@ -176,6 +176,26 @@ export const apiService = {
     return response.data;
   },
 
+  // Volatility endpoints - Phase 3
+  async predictVolatility(ipoId: number, daysAhead: number = 7): Promise<any> {
+    const response = await apiClient.post(
+      `/volatility/predict/${ipoId}`,
+      null,
+      { params: { days_ahead: daysAhead } }
+    );
+    return response.data;
+  },
+
+  async getCurrentGeopoliticalEvents(): Promise<any> {
+    const response = await apiClient.get('/volatility/geopolitical-events');
+    return response.data;
+  },
+
+  async getHighVolatilityIPOs(): Promise<any> {
+    const response = await apiClient.get('/volatility/high-volatility-alert');
+    return response.data;
+  },
+
   // Prospectus endpoints
   async getProspectusSections(ipoId: number) {
     const response = await apiClient.get(`/files/prospectus/${ipoId}/sections`);

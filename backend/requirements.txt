@@ -29,3 +29,11 @@ pandas==2.0.3
 # Web Scraping (IPO Data)
 beautifulsoup4==4.12.3
 lxml==5.1.0
+
+# Volatility Forecaster (Phase 1 + Phase 2)
+transformers==4.36.0
+torch==2.1.0
+yfinance==0.2.32
+newsapi-python==0.2.7
+matplotlib==3.8.2
+joblib==1.3.2

@@ -40,6 +40,9 @@ class Settings(BaseSettings):
     ML_SERVICE_URL: str = "http://localhost:8001"
     ML_REQUEST_TIMEOUT: int = 30
     
+    # News API
+    NEWS_API_KEY: str = "your_newsapi_key_here"
+    
     class Config:
         env_file = ".env"
         case_sensitive = True
