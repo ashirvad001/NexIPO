@@ -240,6 +240,19 @@ export const apiService = {
       return r.data;
     });
   },
+
+  // Allotment Calculator endpoints
+  async getAllotmentCalculation(ipoId: number, lotsApplied: number) {
+    const response = await apiClient.get(`/allotment/calculate/${ipoId}`, {
+      params: { lots_applied: lotsApplied }
+    });
+    return response.data;
+  },
+
+  async getAllotmentComparison(ipoId: number) {
+    const response = await apiClient.get(`/allotment/compare/${ipoId}`);
+    return response.data;
+  },
 };
 
 export default apiService;

@@ -132,13 +132,15 @@ class BERTSentimentExtractor:
     # ------------------------------------------------------------------
     def process_news_batch(self, articles: List[str]) -> Dict:
         """
-        Process a list of articles: extract sentiment + embeddings.
+        Process a list of articles: extract sentiment scores.
+        Optimized: uses batch sentiment pipeline and skips embedding
+        extraction (not needed by the volatility prediction pipeline).
 
         Args:
             articles: List of article texts.
 
         Returns:
-            ``{"embeddings":      np.ndarray (N, 768),
+            ``{"embeddings":      np.ndarray (empty),
               "sentiments":       [float, …],   # polarity per article
               "avg_sentiment":    float,
               "sentiment_volatility": float}``
@@ -151,28 +153,29 @@ class BERTSentimentExtractor:
                 "sentiment_volatility": 0.0,
             }
 
-        embeddings: List[np.ndarray] = []
+        # Batch sentiment extraction via HF pipeline (much faster than per-article)
+        truncated = [text[:512] for text in articles]
+        try:
+            batch_results = self.sentiment_pipeline(truncated, batch_size=len(truncated))
+        except Exception as exc:
+            logger.error("Batch sentiment failed, falling back to per-article: %s", exc)
+            batch_results = [self.sentiment_pipeline(t)[0] for t in truncated]
+
         sentiments: List[float] = []
+        for result in batch_results:
+            label = result["label"]
+            score = float(result["score"])
+            polarity = self._POLARITY_MAP.get(label, 0)
+            sentiments.append(polarity * score)
 
-        for idx, text in enumerate(articles):
-            logger.info(
-                "Processing article %d / %d …", idx + 1, len(articles),
-            )
-
-            # sentiment
-            sent = self.extract_sentiment(text)
-            sentiments.append(float(sent["polarity"]) * sent["score"])
-
-            # embedding
-            emb = self.extract_embeddings(text)
-            embeddings.append(emb)
+        logger.info("Batch-processed sentiment for %d articles.", len(articles))
 
         sentiments_arr = np.array(sentiments)
         avg_sentiment = float(np.mean(sentiments_arr))
         sentiment_vol = float(np.std(sentiments_arr)) if len(sentiments_arr) > 1 else 0.0
 
         return {
-            "embeddings": np.stack(embeddings),          # (N, 768)
+            "embeddings": np.array([]),
             "sentiments": sentiments,
             "avg_sentiment": round(avg_sentiment, 4),
             "sentiment_volatility": round(sentiment_vol, 4),

@@ -54,16 +54,16 @@ export default function RHPViewer({ ipoId, companyName, hasProspectusInitially =
 
     if (!hasProspectus) {
         return (
-            <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 mb-6 mt-6">
-                <h3 className="text-xl font-semibold text-white mb-4 flex items-center">
-                    <FiFileText className="mr-2 text-indigo-400" />
+            <div className="bg-white/60 backdrop-blur-xl border border-gray-200 rounded-2xl p-6 mb-6 mt-6 shadow-sm">
+                <h3 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+                    <FiFileText className="mr-2 text-indigo-600" />
                     Red Herring Prospectus (RHP)
                 </h3>
 
-                <div className="flex flex-col items-center justify-center py-10 text-center border-2 border-dashed border-gray-600 rounded-xl bg-gray-800/30">
-                    <FiFileText className="text-5xl text-gray-500 mb-4" />
-                    <h4 className="text-lg font-medium text-gray-300 mb-2">No RHP Document Available</h4>
-                    <p className="text-gray-400 max-w-md mx-auto mb-6">
+                <div className="flex flex-col items-center justify-center py-10 text-center border-2 border-dashed border-gray-300 rounded-xl bg-gray-50/80">
+                    <FiFileText className="text-5xl text-gray-400 mb-4" />
+                    <h4 className="text-lg font-medium text-gray-900 mb-2">No RHP Document Available</h4>
+                    <p className="text-gray-600 max-w-md mx-auto mb-6">
                         The Red Herring Prospectus for {companyName} hasn't been downloaded to our system yet.
                     </p>
 
@@ -71,7 +71,7 @@ export default function RHPViewer({ ipoId, companyName, hasProspectusInitially =
                         <button
                             onClick={handleAutoDownload}
                             disabled={isDownloading}
-                            className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-800 text-white font-medium rounded-lg transition-colors flex items-center justify-center shadow-lg shadow-indigo-500/30"
+                            className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white font-medium rounded-lg transition-colors flex items-center justify-center shadow-lg shadow-indigo-500/30"
                         >
                             {isDownloading ? (
                                 <><FiRefreshCw className="mr-2 animate-spin" /> Downloading...</>
@@ -90,21 +90,21 @@ export default function RHPViewer({ ipoId, companyName, hasProspectusInitially =
                         <button
                             onClick={handleManualSearch}
                             disabled={isSearching}
-                            className="px-6 py-2.5 bg-gray-700 hover:bg-gray-600 disabled:bg-gray-800 text-white font-medium rounded-lg transition-colors flex items-center justify-center border border-gray-600"
+                            className="px-6 py-2.5 bg-gray-700 hover:bg-gray-800 disabled:bg-gray-400 text-white font-medium rounded-lg transition-colors flex items-center justify-center border border-gray-600"
                         >
                             <FiSearch className="mr-2" /> Search Web Manually
                         </button>
                     </div>
 
                     {(error || (downloadResult && downloadResult.status === 'failed')) && (
-                        <div className="mt-6 flex items-start text-amber-400 bg-amber-400/10 px-4 py-3 rounded-lg text-sm w-full max-w-md text-left">
-                            <FiAlertCircle className="shrink-0 mr-3 mt-0.5" />
+                        <div className="mt-6 flex items-start text-amber-800 bg-amber-100 border border-amber-200 px-4 py-3 rounded-lg text-sm w-full max-w-md text-left">
+                            <FiAlertCircle className="shrink-0 mr-3 mt-0.5 text-amber-600" />
                             <div>
-                                <span className="font-semibold block mb-1">RHP Fetch Status</span>
+                                <span className="font-semibold block mb-1 text-amber-900">RHP Fetch Status</span>
                                 {error ? (
-                                    <span>{error}</span>
+                                    <span className="text-amber-800">{error}</span>
                                 ) : (
-                                    <span>{downloadResult.error || "The prospectus could not be found automatically. Please try uploading it manually."}</span>
+                                    <span className="text-amber-800">{downloadResult.error || "The prospectus could not be found automatically. Please try uploading it manually."}</span>
                                 )}
                             </div>
                         </div>
@@ -116,24 +116,24 @@ export default function RHPViewer({ ipoId, companyName, hasProspectusInitially =
 
     // If we have the prospectus, show the viewer inline
     return (
-        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 mb-6 mt-6">
+        <div className="bg-white/60 backdrop-blur-xl border border-gray-200 rounded-2xl p-6 mb-6 mt-6 shadow-sm">
             <div className="flex justify-between items-center mb-4">
-                <h3 className="text-xl font-semibold text-white flex items-center">
-                    <FiFileText className="mr-2 text-indigo-400" />
+                <h3 className="text-xl font-semibold text-gray-900 flex items-center">
+                    <FiFileText className="mr-2 text-indigo-600" />
                     Red Herring Prospectus Preview
                 </h3>
                 <a
                     href={viewerUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-sm px-4 py-2 bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-300 rounded-lg flex items-center transition-colors border border-indigo-500/30"
+                    className="text-sm px-4 py-2 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 rounded-lg flex items-center transition-colors border border-indigo-200"
                     title="Open PDF in new tab"
                 >
                     <FiDownload className="mr-2" /> Download File
                 </a>
             </div>
 
-            <div className="w-full h-[600px] rounded-xl overflow-hidden border border-gray-700 bg-gray-900 shadow-inner">
+            <div className="w-full h-[600px] rounded-xl overflow-hidden border border-gray-300 bg-gray-100 shadow-inner">
                 <iframe
                     src={viewerUrl}
                     className="w-full h-full border-none"
@@ -142,7 +142,7 @@ export default function RHPViewer({ ipoId, companyName, hasProspectusInitially =
             </div>
 
             {downloadResult && downloadResult.pages && (
-                <div className="mt-4 flex gap-4 text-sm text-gray-400 justify-end">
+                <div className="mt-4 flex gap-4 text-sm text-gray-500 justify-end">
                     <span>Pages: {downloadResult.pages}</span>
                     {downloadResult.size_mb > 0 && <span>Size: {downloadResult.size_mb} MB</span>}
                 </div>

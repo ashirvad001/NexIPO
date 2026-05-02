@@ -42,11 +42,19 @@ export default function UploadProspectus() {
     }
   }, [id]);
 
-  const handleUploadSuccess = (result: any) => {
+  const handleUploadSuccess = async (result: any) => {
     setUploadSuccess(true);
     setUploadError(null);
     setHasProspectus(true);
     fetchIPO();
+    
+    // Automatically process ML risk analysis
+    try {
+      await apiService.predictRisk(Number(id));
+    } catch (err) {
+      console.error('Auto ML risk analysis failed:', err);
+    }
+
     setTimeout(() => setUploadSuccess(false), 5000);
   };
 

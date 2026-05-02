@@ -133,6 +133,7 @@ class IPOUpdate(BaseModel):
 class IPOResponse(IPOBase):
     """Schema for IPO response with additional fields"""
     id: int
+    prospectus_file_id: Optional[str] = None
     risk_score: Optional[float] = None
     risk_category: Optional[str] = None
     ml_processed: bool = False

@@ -69,18 +69,45 @@ if not exist "%ROOT%frontend\node_modules" (
     start "Installing Frontend Deps" /wait cmd /c "cd /d "%ROOT%frontend" && npm install"
 )
 echo  [OK] Frontend dependencies ready
+
+REM ── Check Docker ──
+docker --version >nul 2>&1
+if %errorlevel% neq 0 (
+    echo  [WARNING] Docker is not installed or not in PATH. Database services will be skipped.
+) else (
+    echo  [OK] Docker found
+)
 echo.
 
-REM ── Step 1: Start Backend ──
-echo  [STEP 1/2] Starting NexIPO Backend API...
+REM ── Step 1: Start Databases (Docker) ──
+echo  [STEP 1/3] Starting Database Services (PostgreSQL, Redis, MongoDB)...
+docker compose version >nul 2>&1
+if %errorlevel% equ 0 (
+    echo           Starting containers in background...
+    cd /d "%ROOT%" && docker compose up -d postgres redis mongodb
+) else (
+    docker-compose version >nul 2>&1
+    if %errorlevel% equ 0 (
+        echo           Starting containers in background...
+        cd /d "%ROOT%" && docker-compose up -d postgres redis mongodb
+    ) else (
+        echo  [WARNING] Docker compose not found. Skipping databases.
+    )
+)
+echo           Waiting for databases to initialize (approx 5s)...
+timeout /t 5 /nobreak >nul
+echo.
+
+REM ── Step 2: Start Backend ──
+echo  [STEP 2/3] Starting NexIPO Backend API...
 start "NexIPO API Server" cmd /k "cd /d "%ROOT%backend" && call venv\Scripts\activate.bat && python main.py"
 echo           Waiting for backend to initialize (approx 8s)...
 timeout /t 8 /nobreak >nul
 echo           Backend should be live at http://localhost:8000
 echo.
 
-REM ── Step 2: Start Frontend ──
-echo  [STEP 2/2] Starting NexIPO Frontend UI...
+REM ── Step 3: Start Frontend ──
+echo  [STEP 3/3] Starting NexIPO Frontend UI...
 start "NexIPO Web Frontend" cmd /k "cd /d "%ROOT%frontend" && npm run dev"
 echo           Waiting for frontend to compile...
 timeout /t 6 /nobreak >nul
@@ -101,9 +128,10 @@ echo   Frontend:    http://localhost:3000
 echo   Backend:     http://localhost:8000
 echo   API Docs:    http://localhost:8000/api/docs
 echo.
-echo   Two terminal windows are open:
-echo     1. "NexIPO Backend"  - Python/FastAPI server
-echo     2. "NexIPO Frontend" - Next.js dev server
+echo   Active components:
+echo     1. Databases       - Docker (PostgreSQL, Redis, MongoDB)
+echo     2. "NexIPO Backend"  - Python/FastAPI server (Terminal)
+echo     3. "NexIPO Frontend" - Next.js dev server (Terminal)
 echo.
 echo   To stop: press Ctrl+C in each terminal window.
 echo  =============================================

@@ -62,10 +62,10 @@ async def main():
             
             if result.get("status") == "success":
                 success_count += 1
-                details.append(f"✓ {ipo.company_name} - Downloaded from {result['source']} ({result.get('pages', 0)} pages, {result.get('size_mb', 0)} MB)")
+                details.append(f"[SUCCESS] {ipo.company_name} - Downloaded from {result['source']} ({result.get('pages', 0)} pages, {result.get('size_mb', 0)} MB)")
             else:
                 failed_count += 1
-                details.append(f"✗ {ipo.company_name} - {result.get('error', 'Failed')}")
+                details.append(f"[FAILED] {ipo.company_name} - {result.get('error', 'Failed')}")
                 
         # Generate Report
         report_date = datetime.now().strftime("%Y-%m-%d")
@@ -79,9 +79,10 @@ Details:
         for d in details:
             report += f"{d}\n"
             
-        print("\n" + "="*50)
-        print(report)
-        print("="*50 + "\n")
+        import sys
+        print("\n" + "="*50, file=sys.stdout)
+        print(report.encode("utf-8", "replace").decode("utf-8"), file=sys.stdout)
+        print("="*50 + "\n", file=sys.stdout)
         
         # Save report
         with open(f"rhp_report_{report_date}.txt", "w", encoding="utf-8") as f:

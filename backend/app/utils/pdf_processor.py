@@ -25,22 +25,24 @@ class PDFProcessor:
             with pdfplumber.open(pdf_path) as pdf:
                 metadata["total_pages"] = len(pdf.pages)
                 
-                for page_num, page in enumerate(pdf.pages, 1):
+                # OPTIMIZATION: Process only the first 50 pages and skip slow table extraction
+                # This drastically reduces the time it takes to "download" and process the RHP
+                pages_to_process = pdf.pages[:50]
+                
+                for page_num, page in enumerate(pages_to_process, 1):
                     text = page.extract_text()
                     if text:
                         full_text.append(f"\n--- Page {page_num} ---\n")
                         full_text.append(text)
                     
-                    tables = page.extract_tables()
-                    if tables:
-                        metadata["has_tables"] = True
-                        for table in tables:
-                            for row in table:
-                                if row:
-                                    full_text.append(" | ".join([str(cell) if cell else "" for cell in row]))
+                    # Table extraction is extremely slow in pdfplumber, skipping for performance
+                    # tables = page.extract_tables()
                     
-                    if page.images:
-                        metadata["has_images"] = True
+                    # if page.images:
+                    #     metadata["has_images"] = True
+            
+            if len(pdf.pages) > 50:
+                full_text.append("\n... [Text extraction limited to first 50 pages for performance] ...\n")
             
             return "\n".join(full_text), metadata
             
@@ -107,8 +109,8 @@ class PDFProcessor:
             return {"error": str(e)}
     
     @staticmethod
-    async def process_prospectus(pdf_path: str) -> Dict:
-        """Complete prospectus processing pipeline"""
+    def _process_prospectus_sync(pdf_path: str) -> Dict:
+        """Complete prospectus processing pipeline (synchronous)"""
         try:
             pdf_info = PDFProcessor.get_pdf_info(pdf_path)
             raw_text, extraction_metadata = PDFProcessor.extract_text(pdf_path)
@@ -129,3 +131,9 @@ class PDFProcessor:
         except Exception as e:
             logger.error(f"Prospectus processing failed: {e}")
             return {"success": False, "error": str(e)}
+
+    @staticmethod
+    async def process_prospectus(pdf_path: str) -> Dict:
+        """Complete prospectus processing pipeline asynchronously"""
+        import asyncio
+        return await asyncio.to_thread(PDFProcessor._process_prospectus_sync, pdf_path)

@@ -16,8 +16,9 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto", bcrypt__trunca
 
 # JWT settings
 SECRET_KEY = settings.SECRET_KEY
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+ALGORITHM = settings.ALGORITHM
+ACCESS_TOKEN_EXPIRE_MINUTES = settings.ACCESS_TOKEN_EXPIRE_MINUTES
+REFRESH_TOKEN_EXPIRE_DAYS = settings.REFRESH_TOKEN_EXPIRE_DAYS
 
 
 class AuthService:
@@ -53,6 +54,17 @@ class AuthService:
         return encoded_jwt
 
     @staticmethod
+    def create_refresh_token(data: dict) -> str:
+        """
+        Create JWT refresh token with longer expiry.
+        Includes a 'type' claim to distinguish from access tokens.
+        """
+        to_encode = data.copy()
+        expire = datetime.utcnow() + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
+        to_encode.update({"exp": expire, "type": "refresh"})
+        return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+
+    @staticmethod
     def decode_token(token: str) -> dict:
         """
         Decode and verify JWT token
@@ -66,6 +78,24 @@ class AuthService:
                 detail="Could not validate credentials",
                 headers={"WWW-Authenticate": "Bearer"},
             )
+
+    @staticmethod
+    def refresh_access_token(refresh_token: str) -> str:
+        """
+        Validate a refresh token and issue a new access token.
+        Raises 401 if the token is invalid or not a refresh token.
+        """
+        payload = AuthService.decode_token(refresh_token)
+        if payload.get("type") != "refresh":
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid refresh token",
+            )
+        # Issue a new access token with the same subject
+        new_token = AuthService.create_access_token(
+            {"sub": payload.get("sub"), "email": payload.get("email")}
+        )
+        return new_token
 
     @staticmethod
     def get_user_by_email(db: Session, email: str) -> Optional[User]:

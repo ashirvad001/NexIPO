@@ -212,17 +212,25 @@ class RHPDownloader:
         try:
             with open(file_path, "rb") as f:
                 # Create a simple mock that FileService accepts
-                class MockUploadFile(UploadFile):
+                class MockUploadFile:
                     def __init__(self, filename, file_obj):
-                        self.filename = filename
-                        self.file = file_obj
-                        self.content_type = "application/pdf"
+                        self._filename = filename
+                        self._file = file_obj
+                    
+                    @property
+                    def filename(self): return self._filename
+                    
+                    @property
+                    def file(self): return self._file
+                    
+                    @property
+                    def content_type(self): return "application/pdf"
                         
                     async def read(self, size=-1):
-                        return self.file.read(size)
+                        return self._file.read(size) if size > 0 else self._file.read()
                         
                     async def seek(self, offset):
-                        self.file.seek(offset)
+                        self._file.seek(offset)
                         
                 mock_file = MockUploadFile(filename, f)
                 result = await FileService.upload_prospectus(ipo_id, mock_file)
@@ -253,15 +261,29 @@ class RHPDownloader:
             "error": None
         }
         
-        # 1. Try Chittorgarh
-        pdf_path = await self.download_from_chittorgarh(ipo.company_name, download_dir)
-        source = "Chittorgarh"
+        # 0. Try Manual Uploads Folder First
+        manual_dir = os.path.join(download_dir, "manual")
+        os.makedirs(manual_dir, exist_ok=True)
+        safe_name = re.sub(r'[^a-zA-Z0-9]', '_', ipo.company_name).strip('_')
+        manual_path = os.path.join(manual_dir, f"{safe_name}_RHP.pdf")
         
-        # 2. Try SEBI (Fallback)
-        if not pdf_path:
-            # Wrap synchronous Selenium scraper in a thread to avoid blocking the event loop
-            pdf_path = await asyncio.to_thread(self.download_from_sebi, ipo.company_name, download_dir)
-            source = "SEBI"
+        pdf_path = None
+        source = None
+        
+        if os.path.exists(manual_path):
+            logger.info(f"Found manual RHP for {ipo.company_name} at {manual_path}")
+            pdf_path = manual_path
+            source = "Manual Upload"
+        else:
+            # 1. Try Chittorgarh
+            pdf_path = await self.download_from_chittorgarh(ipo.company_name, download_dir)
+            source = "Chittorgarh"
+            
+            # 2. Try SEBI (Fallback)
+            if not pdf_path:
+                # Wrap synchronous Selenium scraper in a thread to avoid blocking the event loop
+                pdf_path = await asyncio.to_thread(self.download_from_sebi, ipo.company_name, download_dir)
+                source = "SEBI"
             
         if not pdf_path:
             log_result["error"] = "Not found on any portal"
@@ -286,7 +308,7 @@ class RHPDownloader:
             log_result["source"] = source
             
         # Cleanup temp file
-        if os.path.exists(pdf_path):
+        if source != "Manual Upload" and os.path.exists(pdf_path):
             os.remove(pdf_path)
             
         return log_result

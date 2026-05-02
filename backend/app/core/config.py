@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     
     # Project Info
     PROJECT_NAME: str = "IPO Intelligence Platform"
-    VERSION: str = "1.0.0"
+    VERSION: str = "1.0.1"
     API_V1_PREFIX: str = "/api/v1"
     DEBUG: bool = False
     
@@ -28,6 +28,14 @@ class Settings(BaseSettings):
     SECRET_KEY: str
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    REFRESH_TOKEN_EXPIRE_DAYS: int = 7
+    
+    # Rate Limiting
+    RATE_LIMIT_AUTH: str = "10/minute"
+    RATE_LIMIT_DEFAULT: str = "60/minute"
+    
+    # Logging
+    LOG_LEVEL: str = "INFO"
     
     # CORS
     BACKEND_CORS_ORIGINS: List[str] = ["http://localhost:3000"]

@@ -322,10 +322,11 @@ python test_api.py
 - [ ] IPO detail page
 - [ ] Charts (subscription, GMP)
 
-### 🔜 Phase 3: File Ingestion (Days 11-12)
-- [ ] PDF upload functionality
-- [ ] Text extraction (PDFPlumber)
-- [ ] MongoDB storage
+### ✅ Phase 3: File Ingestion (Days 11-12) - **COMPLETE**
+- [x] Manual PDF upload functionality (RHP Viewer)
+- [x] Automated web fetching (SEBI/Chittorgarh)
+- [x] High-performance text extraction (PDFPlumber optimized)
+- [x] Secure iframe PDF previewing
 
 ### ✅ Phase 4: ML Pipeline (Days 13-18) - **COMPLETE**
 - [x] NLP preprocessing

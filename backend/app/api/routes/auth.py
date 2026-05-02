@@ -1,12 +1,14 @@
 from datetime import timedelta
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
+from pydantic import BaseModel
 
 from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
+from app.core.security import limiter
 from app.db.database import get_db
 from app.services.auth_service import AuthService
 from app.schemas.user import UserCreate, UserResponse, Token
@@ -29,31 +31,75 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
     return user
 
 
+# ── Request / Response schemas for refresh ─────────────────────────────────
+
+class RefreshRequest(BaseModel):
+    refresh_token: str
+
+
+class RefreshResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+
+
+# ── Auth Endpoints ─────────────────────────────────────────────────────────
+
 @router.post("/auth/signup", response_model=Token)
-def signup(user_in: UserCreate, db: Session = Depends(get_db)) -> Any:
+@limiter.limit(settings.RATE_LIMIT_AUTH)
+def signup(request: Request, user_in: UserCreate, db: Session = Depends(get_db)) -> Any:
     user = AuthService.create_user(db, user_in)
     access_token = AuthService.create_access_token({"sub": str(user.id), "email": user.email})
-    return {"access_token": access_token, "token_type": "bearer", "user": user}
+    refresh_token = AuthService.create_refresh_token({"sub": str(user.id), "email": user.email})
+    return {
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+        "token_type": "bearer",
+        "user": user,
+    }
 
 
 @router.post("/auth/login", response_model=Token)
-def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+@limiter.limit(settings.RATE_LIMIT_AUTH)
+def login(request: Request, form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     user = AuthService.authenticate_user(db, form_data.username, form_data.password)
     if not user:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect credentials")
     access_token = AuthService.create_access_token({"sub": str(user.id), "email": user.email})
-    return {"access_token": access_token, "token_type": "bearer", "user": user}
+    refresh_token = AuthService.create_refresh_token({"sub": str(user.id), "email": user.email})
+    return {
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+        "token_type": "bearer",
+        "user": user,
+    }
 
 
 @router.post("/auth/login/json", response_model=Token)
-def login_json(payload: dict, db: Session = Depends(get_db)):
+@limiter.limit(settings.RATE_LIMIT_AUTH)
+def login_json(request: Request, payload: dict, db: Session = Depends(get_db)):
     identifier = payload.get("identifier") or payload.get("email")
     password = payload.get("password")
     user = AuthService.authenticate_user(db, identifier, password)
     if not user:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect credentials")
     access_token = AuthService.create_access_token({"sub": str(user.id), "email": user.email})
-    return {"access_token": access_token, "token_type": "bearer", "user": user}
+    refresh_token = AuthService.create_refresh_token({"sub": str(user.id), "email": user.email})
+    return {
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+        "token_type": "bearer",
+        "user": user,
+    }
+
+
+@router.post("/auth/refresh", response_model=RefreshResponse)
+@limiter.limit(settings.RATE_LIMIT_AUTH)
+def refresh_token(request: Request, body: RefreshRequest):
+    """
+    Exchange a valid refresh token for a new access token.
+    """
+    new_access_token = AuthService.refresh_access_token(body.refresh_token)
+    return {"access_token": new_access_token, "token_type": "bearer"}
 
 
 @router.get("/auth/me", response_model=UserResponse)

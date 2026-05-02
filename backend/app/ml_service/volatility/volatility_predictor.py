@@ -61,16 +61,26 @@ class VolatilityForecaster:
                 logger.info(f"Returning cached prediction for {cache_key}")
                 return cached_res
 
+        t0 = time.time()
         logger.info(f"Starting volatility prediction for {company_name} ({symbol})")
         
         # 1. Collect News & 2. Extract Sentiment
         articles = []
         if self.news_collector:
-            articles = self.news_collector.get_recent_news(company_name, days_back=30)
+            articles = self.news_collector.get_recent_news(company_name, days_back=7)
+        
+        # Limit to top 10 articles to cap BERT processing time
+        articles = articles[:10]
+            
+        t1 = time.time()
+        logger.info(f"[PERF] News collection: {t1 - t0:.2f}s ({len(articles)} articles)")
             
         sentiment_data = self.bert.process_news_batch(articles)
         sentiment_score = sentiment_data.get("avg_sentiment", 0.0)
         sentiment_vol = sentiment_data.get("sentiment_volatility", 0.0)
+        
+        t2 = time.time()
+        logger.info(f"[PERF] BERT sentiment: {t2 - t1:.2f}s")
         
         # 3. Detect Geopolitical Events
         agg_geo_text = " ".join(articles)
@@ -79,7 +89,7 @@ class VolatilityForecaster:
         
         # 4. Get stock prices
         try:
-            stock_df = self.stock_collector.get_stock_data(symbol, period="90d")
+            stock_df = self.stock_collector.get_stock_data(symbol, period="60d")
             
             if len(stock_df) < (self.lstm.sequence_length + 10): 
                 raise ValueError("Insufficient price history")
@@ -92,8 +102,11 @@ class VolatilityForecaster:
             X_input_scaled = self.lstm.scaler.transform(X_input_raw)
             X_seq = np.array([X_input_scaled], dtype=np.float32)
             
-            # 6 & 7. Predict volatility & Confidence (OPTIMIZED: Iterations 30 -> 15)
-            mean_pred, std_pred = self.lstm.predict_with_confidence(X_seq, n_iterations=15)
+            t3 = time.time()
+            logger.info(f"[PERF] Stock data + features: {t3 - t2:.2f}s")
+            
+            # 6 & 7. Predict volatility & Confidence (OPTIMIZED: 5 MC iterations)
+            mean_pred, std_pred = self.lstm.predict_with_confidence(X_seq, n_iterations=5)
             
             pred_vol_sc = mean_pred[0].reshape(-1, 1)
             pred_vol_actual = self.lstm.target_scaler.inverse_transform(pred_vol_sc)[0][0]
@@ -128,6 +141,10 @@ class VolatilityForecaster:
                 'confidence_score': confidence_score,
                 'timestamp': datetime.now().isoformat()
             }
+            
+            t4 = time.time()
+            logger.info(f"[PERF] LSTM inference + post-processing: {t4 - t3:.2f}s")
+            logger.info(f"[PERF] Total prediction time: {t4 - t0:.2f}s")
             
             # Store in Cache
             self._cache[cache_key] = (datetime.now(), result)

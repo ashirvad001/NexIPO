@@ -5,6 +5,7 @@ import Layout from '@/components/Layout';
 import Loading from '@/components/Loading';
 import RHPViewer from '@/components/RHPViewer';
 import VolatilityForecast from '@/components/VolatilityForecast';
+import AllotmentCalculator from '@/components/AllotmentCalculator';
 import { apiService } from '@/services/api';
 import { IPO } from '@/types/ipo';
 import { useWebSocket } from '@/contexts/WebSocketContext';
@@ -417,6 +418,18 @@ export default function IPODetailPage() {
             ipoId={ipo.id}
             symbol={ipo.symbol || ''}
             companyName={ipo.company_name}
+          />
+        </div>
+
+        {/* Allotment Calculator Section */}
+        <div className="mb-5 sm:mb-6">
+          <AllotmentCalculator 
+            ipoId={ipo.id}
+            companyName={ipo.company_name}
+            lotSize={ipo.lot_size}
+            priceUpper={ipo.price_band_upper}
+            retailSubscription={ipo.retail_subscription}
+            status={ipo.status}
           />
         </div>
 

@@ -109,35 +109,39 @@ class FileService:
                     detail=f"PDF processing failed: {processed_data.get('error')}"
                 )
             
-            prospectus_collection = await get_prospectus_collection()
-            file_metadata_collection = await get_file_metadata_collection()
-            
-            prospectus_doc = {
-                "ipo_id": ipo_id,
-                "file_id": file_id,
-                "raw_text": processed_data["raw_text"],
-                "cleaned_text": processed_data["cleaned_text"],
-                "sections": processed_data["sections"],
-                "created_at": datetime.utcnow(),
-                "word_count": processed_data["word_count"],
-                "char_count": processed_data["char_count"],
-            }
-            
-            prospectus_result = await prospectus_collection.insert_one(prospectus_doc)
-            
-            file_metadata = {
-                "file_id": file_id,
-                "ipo_id": ipo_id,
-                "original_filename": file.filename,
-                "file_size": file_path.stat().st_size,
-                "mime_type": file.content_type,
-                "uploaded_at": datetime.utcnow(),
-                "pdf_info": processed_data["pdf_info"],
-                "extraction_metadata": processed_data["extraction_metadata"],
-                "mongodb_id": str(prospectus_result.inserted_id),
-            }
-            
-            await file_metadata_collection.insert_one(file_metadata)
+            try:
+                prospectus_collection = await get_prospectus_collection()
+                file_metadata_collection = await get_file_metadata_collection()
+                
+                prospectus_doc = {
+                    "ipo_id": ipo_id,
+                    "file_id": file_id,
+                    "raw_text": processed_data["raw_text"],
+                    "cleaned_text": processed_data["cleaned_text"],
+                    "sections": processed_data["sections"],
+                    "created_at": datetime.utcnow(),
+                    "word_count": processed_data["word_count"],
+                    "char_count": processed_data["char_count"],
+                }
+                
+                prospectus_result = await prospectus_collection.insert_one(prospectus_doc)
+                
+                file_metadata = {
+                    "file_id": file_id,
+                    "ipo_id": ipo_id,
+                    "original_filename": file.filename,
+                    "file_size": file_path.stat().st_size,
+                    "mime_type": file.content_type,
+                    "uploaded_at": datetime.utcnow(),
+                    "pdf_info": processed_data["pdf_info"],
+                    "extraction_metadata": processed_data["extraction_metadata"],
+                    "mongodb_id": str(prospectus_result.inserted_id),
+                }
+                
+                await file_metadata_collection.insert_one(file_metadata)
+            except Exception as e:
+                import logging
+                logging.getLogger("nexipo").warning(f"MongoDB not available, skipping db insert: {e}")
             
             return {
                 "file_id": file_id,

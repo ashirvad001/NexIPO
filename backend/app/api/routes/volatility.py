@@ -2,6 +2,9 @@
 Volatility forecasting API endpoints
 """
 
+import asyncio
+import time
+from functools import partial
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
@@ -49,12 +52,22 @@ async def predict_ipo_volatility(
     symbol = ipo.symbol or "PENDING"
         
     try:
-        # Predict 
-        result = predictor.predict_volatility(
-            symbol=symbol,
-            company_name=ipo.company_name,
-            days_ahead=days_ahead
+        t_start = time.time()
+        
+        # Run CPU-bound ML prediction in a thread pool to avoid blocking the event loop
+        loop = asyncio.get_event_loop()
+        result = await loop.run_in_executor(
+            None,
+            partial(
+                predictor.predict_volatility,
+                symbol=symbol,
+                company_name=ipo.company_name,
+                days_ahead=days_ahead,
+            )
         )
+        
+        elapsed = time.time() - t_start
+        print(f"[PERF] Volatility prediction for {ipo.company_name}: {elapsed:.2f}s")
         
         # Optionally, save ML risk back to the IPO model
         ipo.risk_score = result.get('predicted_volatility_percentage')

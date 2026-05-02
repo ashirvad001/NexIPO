@@ -103,7 +103,8 @@ const FileUpload: React.FC<FileUploadProps> = ({
         onUploadError?.('Network error during upload');
       });
 
-      xhr.open('POST', `${process.env.NEXT_PUBLIC_API_BASE_URL}/files/upload/prospectus/${ipoId}`);
+      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api/v1';
+      xhr.open('POST', `${baseUrl}/files/upload/prospectus/${ipoId}`);
       xhr.send(formData);
 
     } catch (error: any) {
