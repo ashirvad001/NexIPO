@@ -71,31 +71,57 @@ if not exist "%ROOT%frontend\node_modules" (
 echo  [OK] Frontend dependencies ready
 
 REM ── Check Docker ──
+set DOCKER_AVAILABLE=0
 docker --version >nul 2>&1
 if %errorlevel% neq 0 (
-    echo  [WARNING] Docker is not installed or not in PATH. Database services will be skipped.
+    echo  [WARNING] Docker CLI is not installed or not in PATH. Database services will be skipped.
 ) else (
-    echo  [OK] Docker found
+    docker info >nul 2>&1
+    if %errorlevel% neq 0 (
+        echo  [INFO] Docker CLI found, but Docker Engine is not running.
+        if exist "C:\Program Files\Docker\Docker\Docker Desktop.exe" (
+            echo  [INFO] Launching Docker Desktop...
+            start "" "C:\Program Files\Docker\Docker\Docker Desktop.exe" >nul 2>&1
+            echo         Waiting for Docker engine to initialize (12s)...
+            timeout /t 12 /nobreak >nul
+            docker info >nul 2>&1
+            if %errorlevel% equ 0 (
+                echo  [OK] Docker Engine is now active!
+                set DOCKER_AVAILABLE=1
+            ) else (
+                echo  [WARNING] Docker Engine is still starting up. Skipping containers for now (Backend will use SQLite fallback).
+            )
+        ) else (
+            echo  [WARNING] Docker Desktop not found at standard path. Skipping container startup.
+        )
+    ) else (
+        echo  [OK] Docker Engine is ready!
+        set DOCKER_AVAILABLE=1
+    )
 )
 echo.
 
 REM ── Step 1: Start Databases (Docker) ──
-echo  [STEP 1/3] Starting Database Services (PostgreSQL, Redis, MongoDB)...
-docker compose version >nul 2>&1
-if %errorlevel% equ 0 (
-    echo           Starting containers in background...
-    cd /d "%ROOT%" && docker compose up -d postgres redis mongodb
-) else (
-    docker-compose version >nul 2>&1
+if "%DOCKER_AVAILABLE%"=="1" (
+    echo  [STEP 1/3] Starting Database Services (PostgreSQL, Redis, MongoDB)...
+    docker compose version >nul 2>&1
     if %errorlevel% equ 0 (
         echo           Starting containers in background...
-        cd /d "%ROOT%" && docker-compose up -d postgres redis mongodb
+        cd /d "%ROOT%" && docker compose up -d postgres redis mongodb
     ) else (
-        echo  [WARNING] Docker compose not found. Skipping databases.
+        docker-compose version >nul 2>&1
+        if %errorlevel% equ 0 (
+            echo           Starting containers in background...
+            cd /d "%ROOT%" && docker-compose up -d postgres redis mongodb
+        ) else (
+            echo  [WARNING] Docker compose not found. Skipping databases.
+        )
     )
+    echo           Waiting for databases to initialize (approx 5s)...
+    timeout /t 5 /nobreak >nul
+) else (
+    echo  [STEP 1/3] Database Services skipped (Docker engine not ready). Using local SQLite fallback.
 )
-echo           Waiting for databases to initialize (approx 5s)...
-timeout /t 5 /nobreak >nul
 echo.
 
 REM ── Step 2: Start Backend ──

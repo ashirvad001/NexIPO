@@ -1,0 +1,210 @@
+{
+  "schema_version": "1.0.0",
+  "risk_classifier": {
+    "max_tfidf_features": 1000,
+    "custom_feature_count": 24,
+    "total_width": 1024,
+    "scaling": "StandardScaler (fit during training, applied at inference)",
+    "custom_features": [
+      {
+        "name": "risk_count",
+        "dtype": "float64",
+        "source": "risk_indicators",
+        "transformation": "raw count from text"
+      },
+      {
+        "name": "financial_risk_count",
+        "dtype": "float64",
+        "source": "risk_indicators",
+        "transformation": "raw count from text"
+      },
+      {
+        "name": "regulatory_risk_count",
+        "dtype": "float64",
+        "source": "risk_indicators",
+        "transformation": "raw count from text"
+      },
+      {
+        "name": "market_risk_count",
+        "dtype": "float64",
+        "source": "risk_indicators",
+        "transformation": "raw count from text"
+      },
+      {
+        "name": "operational_risk_count",
+        "dtype": "float64",
+        "source": "risk_indicators",
+        "transformation": "raw count from text"
+      },
+      {
+        "name": "negative_indicator_count",
+        "dtype": "float64",
+        "source": "risk_indicators",
+        "transformation": "raw count from text"
+      },
+      {
+        "name": "hedging_word_count",
+        "dtype": "float64",
+        "source": "risk_indicators",
+        "transformation": "raw count from text"
+      },
+      {
+        "name": "risk_density",
+        "dtype": "float64",
+        "source": "risk_indicators",
+        "transformation": "high_risk / word_count"
+      },
+      {
+        "name": "word_count",
+        "dtype": "float64",
+        "source": "readability",
+        "transformation": "len(words)"
+      },
+      {
+        "name": "sentence_count",
+        "dtype": "float64",
+        "source": "readability",
+        "transformation": "len(sentences)"
+      },
+      {
+        "name": "avg_word_length",
+        "dtype": "float64",
+        "source": "readability",
+        "transformation": "mean char length per word"
+      },
+      {
+        "name": "avg_sentence_length",
+        "dtype": "float64",
+        "source": "readability",
+        "transformation": "words / sentences"
+      },
+      {
+        "name": "risk_factors_word_count",
+        "dtype": "float64",
+        "source": "sections",
+        "transformation": "len(section.split())"
+      },
+      {
+        "name": "risk_factors_present",
+        "dtype": "float64",
+        "source": "sections",
+        "transformation": "1 if word_count > 0 else 0"
+      },
+      {
+        "name": "financial_information_word_count",
+        "dtype": "float64",
+        "source": "sections",
+        "transformation": "len(section.split())"
+      },
+      {
+        "name": "financial_information_present",
+        "dtype": "float64",
+        "source": "sections",
+        "transformation": "1 if word_count > 0 else 0"
+      },
+      {
+        "name": "management_word_count",
+        "dtype": "float64",
+        "source": "sections",
+        "transformation": "len(section.split())"
+      },
+      {
+        "name": "management_present",
+        "dtype": "float64",
+        "source": "sections",
+        "transformation": "1 if word_count > 0 else 0"
+      },
+      {
+        "name": "business_strategy_word_count",
+        "dtype": "float64",
+        "source": "sections",
+        "transformation": "len(section.split())"
+      },
+      {
+        "name": "business_strategy_present",
+        "dtype": "float64",
+        "source": "sections",
+        "transformation": "1 if word_count > 0 else 0"
+      },
+      {
+        "name": "issue_size",
+        "dtype": "float64",
+        "source": "ipo_data",
+        "transformation": "issue_size_rs_cr, default 0"
+      },
+      {
+        "name": "total_subscription",
+        "dtype": "float64",
+        "source": "ipo_data",
+        "transformation": "total_subscription, default 0"
+      },
+      {
+        "name": "gmp_percentage",
+        "dtype": "float64",
+        "source": "ipo_data",
+        "transformation": "gmp_percentage, default 0"
+      },
+      {
+        "name": "pe_ratio",
+        "dtype": "float64",
+        "source": "ipo_data",
+        "transformation": "pe_ratio, default 0"
+      }
+    ]
+  },
+  "volatility_lstm": {
+    "feature_count": 8,
+    "sequence_length": 30,
+    "scaling": "MinMaxScaler (fit during training, applied at inference)",
+    "features": [
+      {
+        "name": "log_return",
+        "dtype": "float64",
+        "source": "price_data",
+        "transformation": "log(close / close.shift(1))"
+      },
+      {
+        "name": "rolling_vol_7d",
+        "dtype": "float64",
+        "source": "price_data",
+        "transformation": "log_return.rolling(7).std() * sqrt(252)"
+      },
+      {
+        "name": "volume_change",
+        "dtype": "float64",
+        "source": "price_data",
+        "transformation": "log((volume+1) / (volume.shift(1)+1))"
+      },
+      {
+        "name": "high_low_range",
+        "dtype": "float64",
+        "source": "price_data",
+        "transformation": "(high - low) / close"
+      },
+      {
+        "name": "rsi_14",
+        "dtype": "float64",
+        "source": "price_data",
+        "transformation": "RSI(close, 14) / 100"
+      },
+      {
+        "name": "sma_ratio_20",
+        "dtype": "float64",
+        "source": "price_data",
+        "transformation": "(close / SMA(20)) - 1"
+      },
+      {
+        "name": "sentiment_proxy",
+        "dtype": "float64",
+        "source": "sentiment",
+        "transformation": "sign(log_return) * |log_return|; last 7d overwritten with sentiment/10"
+      },
+      {
+        "name": "momentum_5d",
+        "dtype": "float64",
+        "source": "price_data",
+        "transformation": "(close / close.shift(5)) - 1"
+      }
+    ]
+  }
+}

@@ -24,6 +24,7 @@ from app.ml_service.preprocessing.text_preprocessor import TextPreprocessor
 from app.ml_service.feature_engineering.feature_extractor import FeatureExtractor
 from app.ml_service.models.risk_classifier import RiskClassifier
 from app.ml_service.inference.explainer import Explainer
+from app.ml_service.feature_schema import RiskFeatureSchema
 
 logger = logging.getLogger(__name__)
 
@@ -424,6 +425,17 @@ class RiskPredictor:
             ipo_data=ipo_data,
             risk_indicators=risk_indicators,
         )
+
+        # Schema validation: ensure feature width matches expectation
+        schema = RiskFeatureSchema(
+            max_tfidf_features=self.feature_extractor.max_features,
+        )
+        actual_width = features.shape[-1]
+        if actual_width != schema.expected_width:
+            logger.error(
+                "Feature width mismatch: got %d, schema expects %d",
+                actual_width, schema.expected_width,
+            )
 
         prediction = self.classifier.predict(features)[0]
         probabilities = self.classifier.predict_proba(features)[0]

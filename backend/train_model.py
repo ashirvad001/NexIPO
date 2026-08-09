@@ -8,6 +8,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 from app.ml_service.preprocessing.text_preprocessor import TextPreprocessor
 from app.ml_service.feature_engineering.feature_extractor import FeatureExtractor
 from app.ml_service.models.risk_classifier import IPORiskClassifier
+from app.ml_service.feature_schema import RiskFeatureSchema
 
 # Sample training data
 texts = [
@@ -27,14 +28,21 @@ processed_texts = [preprocessor.preprocess(t, return_string=True) for t in texts
 risk_indicators = [preprocessor.extract_risk_indicators(t) for t in texts]
 print("✅ Text preprocessing complete")
 
-# Extract features
-extractor = FeatureExtractor(max_features=500)
+# Extract features (max_features must match schema default)
+schema = RiskFeatureSchema()
+extractor = FeatureExtractor(max_features=schema.max_tfidf_features)
 sections = [{'risk_factors': t[:200]} for t in texts]
 ipo_data = [{'issue_size_rs_cr': 1000, 'pe_ratio': 25, 'price_band_lower': 100, 'price_band_upper': 120}] * len(texts)
 
 X, feature_names = extractor.fit_transform(processed_texts, risk_indicators, sections, ipo_data)
 y = np.array(labels)
-print(f"✅ Feature extraction complete: {X.shape[1]} features")
+
+# Validate feature vector matches schema expectation
+assert X.shape[1] == schema.expected_width, (
+    f"Feature count mismatch: got {X.shape[1]}, "
+    f"schema expects {schema.expected_width}"
+)
+print(f"✅ Feature extraction complete: {X.shape[1]} features (schema validated ✓)")
 
 # Train model
 classifier = IPORiskClassifier()

@@ -2,6 +2,9 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from pymongo import MongoClient
 from typing import Optional
 from app.core.config import get_settings
+import logging
+
+logger = logging.getLogger(__name__)
 
 settings = get_settings()
 
@@ -17,7 +20,7 @@ class MongoDB:
         """Connect to MongoDB"""
         cls.client = AsyncIOMotorClient(settings.MONGODB_URL)
         cls.sync_client = MongoClient(settings.MONGODB_URL)
-        print(f"✅ Connected to MongoDB: {settings.MONGODB_DB}")
+        logger.info(f"Connected to MongoDB: {settings.MONGODB_DB}")
     
     @classmethod
     def close(cls):
@@ -26,7 +29,7 @@ class MongoDB:
             cls.client.close()
         if cls.sync_client:
             cls.sync_client.close()
-        print("👋 Closed MongoDB connection")
+        logger.info("Closed MongoDB connection")
     
     @classmethod
     def get_database(cls):

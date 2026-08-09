@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session
 
 from app.models.ipo import IPO
 from app.ml_service.inference.risk_predictor import get_predictor
+from app.ml_service.feature_schema import RiskFeatureSchema
 from app.core.mongodb import MongoDB
 
 
@@ -179,7 +180,7 @@ class MLService:
         return {
             "model_type":       "Multi-Factor Rule Engine + Optional TF-IDF/LR",
             "is_fitted":        predictor.classifier.is_fitted,
-            "feature_count":    1034,
+            "feature_count":    RiskFeatureSchema().expected_width,
             "risk_categories":  ["low", "medium", "high"],
             "scoring_dimensions": list({
                 "subscription": 25,

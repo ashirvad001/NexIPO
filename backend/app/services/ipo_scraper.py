@@ -527,7 +527,6 @@ async def scrape_moneycontrol_ipo_links() -> list[dict]:
             seen.add(link["url"])
             unique_links.append(link)
 
-    print(f"  📡 Found {len(unique_links)} IPO detail links on Moneycontrol")
     logger.info(f"Found {len(unique_links)} IPO detail links on Moneycontrol")
     return unique_links
 
@@ -963,13 +962,12 @@ async def sync_ipos(db: Session) -> dict:
         except Exception as e:
             db.rollback()
             logger.error(f"Error upserting IPO '{ipo_info.get('company_name', '?')}': {e}")
-            print(f"  ❌ Error upserting '{ipo_info.get('company_name', '?')}': {e}")
             summary["errors"] += 1
             continue
 
     # Step 6: Enrich all IPOs from Moneycontrol detail pages
     try:
-        print("  📡 Fetching Moneycontrol IPO links...")
+        logger.info("Fetching Moneycontrol IPO links...")
         mc_links = await scrape_moneycontrol_ipo_links()
 
         if mc_links:
@@ -992,14 +990,14 @@ async def sync_ipos(db: Session) -> dict:
                     result = await enrich_from_moneycontrol(db, ipo, mc_links)
                     if result["fields_updated"] > 0:
                         summary["enriched"] += 1
-                        print(f"  ✅ Enriched '{ipo.company_name}': {result['fields_updated']} fields")
+                        logger.info(f"Enriched '{ipo.company_name}': {result['fields_updated']} fields")
                 except Exception as e:
                     logger.error(f"Error enriching '{ipo.company_name}': {e}")
                     summary["errors"] += 1
 
     except Exception as e:
         logger.error(f"Moneycontrol enrichment failed: {e}")
-        print(f"  ⚠️  Moneycontrol enrichment failed: {e}")
+        logger.warning(f"Moneycontrol enrichment failed (non-critical): {e}")
 
     logger.info(
         f"IPO sync complete: {summary['added']} added, "

@@ -12,6 +12,7 @@ from datetime import datetime, timedelta
 from app.ml_service.volatility.bert_embeddings import BERTSentimentExtractor
 from app.ml_service.volatility.lstm_model import LSTMVolatilityPredictor
 from app.ml_service.volatility.data_collector import NewsDataCollector, StockDataCollector
+from app.ml_service.feature_schema import VolatilityFeatureSchema
 
 logger = logging.getLogger(__name__)
 
@@ -193,6 +194,13 @@ class VolatilityForecaster:
         
         feat["momentum_5d"] = (close / close.shift(5)) - 1
         feat.dropna(inplace=True)
+
+        # Enforce canonical column order from schema
+        vol_schema = VolatilityFeatureSchema()
+        expected_cols = vol_schema.feature_names()
+        feat = feat[expected_cols]
+        vol_schema.validate_dataframe_columns(list(feat.columns))
+
         return feat
 
     def _predict_without_price_history(

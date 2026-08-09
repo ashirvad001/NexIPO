@@ -15,6 +15,8 @@ import torch
 import torch.nn as nn
 from sklearn.preprocessing import MinMaxScaler
 
+from app.ml_service.feature_schema import VolatilityFeatureSchema
+
 logger = logging.getLogger(__name__)
 logging.basicConfig(
     level=logging.INFO,
@@ -99,7 +101,14 @@ class LSTMVolatilityPredictor:
     # ----- model construction -----------------------------------------------
 
     def build_model(self, input_size: int) -> _BiLSTMNetwork:
-        """Build and return the BiLSTM network."""
+        """Build and return the BiLSTM network.
+
+        Validates that ``input_size`` matches the volatility feature
+        schema to prevent silent train/serve mismatch.
+        """
+        vol_schema = VolatilityFeatureSchema()
+        vol_schema.validate_input_size(input_size)
+
         self.model = _BiLSTMNetwork(
             input_size=input_size,
             lstm_units=self.lstm_units,
