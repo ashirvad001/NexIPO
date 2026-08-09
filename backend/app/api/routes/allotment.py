@@ -206,4 +206,4 @@ def quick_summary(
         "retail_lots_available": result.get("breakdown", {}).get("retail_lots_available"),
         "lot_size": ipo.lot_size,
         "min_investment": ipo.lot_size * ipo.price_band_upper if ipo.lot_size and ipo.price_band_upper else None,
-     }
+    }
