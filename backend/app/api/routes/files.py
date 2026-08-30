@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from app.db.database import get_db
 from app.services.file_service import FileService
 from app.services.ipo_service import IPOService
+from app.api.routes.auth import get_current_user
 
 router = APIRouter(prefix="/files", tags=["Files"])
 
@@ -13,7 +14,8 @@ router = APIRouter(prefix="/files", tags=["Files"])
 async def upload_prospectus(
     ipo_id: int,
     file: UploadFile = File(...),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
 ):
     """Upload prospectus PDF for an IPO"""
     ipo = IPOService.get_ipo_by_id(db, ipo_id)
@@ -172,7 +174,8 @@ async def download_prospectus(
 @router.delete("/prospectus/{ipo_id}")
 async def delete_prospectus(
     ipo_id: int,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
 ):
     """Delete prospectus data and file for an IPO"""
     ipo = IPOService.get_ipo_by_id(db, ipo_id)
@@ -240,7 +243,8 @@ async def search_rhp_online(company_name: str):
 @router.post("/rhp/download/{ipo_id}")
 async def download_rhp_for_ipo(
     ipo_id: int,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
 ):
     """
     Automatically download RHP from online sources

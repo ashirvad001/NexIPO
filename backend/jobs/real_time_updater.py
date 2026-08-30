@@ -9,8 +9,8 @@ import httpx
 import yfinance as yf
 from bs4 import BeautifulSoup
 
-# Setup paths so we can import models and database
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+# Setup paths so we can import models and database (now inside jobs/)
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from app.db.database import SessionLocal
 from app.models.ipo import IPO, IPOStatus

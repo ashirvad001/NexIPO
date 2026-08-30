@@ -6,12 +6,13 @@ from typing import List, Dict, Any
 from app.db.database import get_db
 from app.services.ml_service import MLService
 from app.ml_service.inference.risk_predictor import get_predictor
+from app.api.routes.auth import get_current_user
 
 router = APIRouter(prefix="/ml", tags=["Machine Learning"])
 
 
 @router.post("/predict/{ipo_id}")
-async def predict_risk(ipo_id: int, db: Session = Depends(get_db)):
+async def predict_risk(ipo_id: int, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
     """
     Trigger ML risk prediction for an IPO
     
@@ -37,7 +38,8 @@ async def predict_risk(ipo_id: int, db: Session = Depends(get_db)):
 async def predict_batch(
     ipo_ids: List[int],
     background_tasks: BackgroundTasks,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
 ):
     """
     Trigger batch ML predictions for multiple IPOs
@@ -88,7 +90,7 @@ async def get_prediction(ipo_id: int, db: Session = Depends(get_db)):
 
 
 @router.delete("/prediction/{ipo_id}")
-async def delete_prediction(ipo_id: int, db: Session = Depends(get_db)):
+async def delete_prediction(ipo_id: int, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
     """
     Delete ML prediction for an IPO
     
@@ -163,7 +165,7 @@ async def get_statistics(db: Session = Depends(get_db)):
 
 
 @router.post("/predict-risk")
-async def predict_risk_direct(data: Dict[str, Any]):
+async def predict_risk_direct(data: Dict[str, Any], current_user=Depends(get_current_user)):
     """
     Direct risk prediction from prospectus text (no database)
     

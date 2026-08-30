@@ -5,8 +5,8 @@ import os
 import logging
 from datetime import datetime
 
-# Setup path so we can import 'app'
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+# Setup path so we can import 'app' (now inside jobs/)
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from app.db.database import SessionLocal
 from app.models.ipo import IPO

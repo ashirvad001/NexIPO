@@ -22,7 +22,7 @@ pip install -r requirements.txt
 copy .env.example .env
 
 # Seed database with sample data (first time only)
-python seed_data.py
+python scripts/seed_data.py
 
 # Start the backend server
 python -m uvicorn main:app --reload --host 0.0.0.0 --port 8000

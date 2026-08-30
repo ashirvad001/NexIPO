@@ -14,6 +14,7 @@ from app.db.database import get_db
 from app.core.config import get_settings
 from app.models.ipo import IPO
 from app.ml_service.volatility.volatility_predictor import VolatilityForecaster
+from app.api.routes.auth import get_current_user
 
 router = APIRouter(prefix="/volatility", tags=["Volatility Forecasting"])
 
@@ -31,7 +32,8 @@ except Exception as e:
 async def predict_ipo_volatility(
     ipo_id: int,
     days_ahead: int = 7,  # Fixed to 7 for Phase 2 LSTM
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
 ):
     """
     Predict stock volatility for an IPO
@@ -102,7 +104,7 @@ async def get_current_geopolitical_events():
 
 
 @router.post("/batch-predict")
-async def batch_predict_volatility(ipo_ids: List[int], db: Session = Depends(get_db)):
+async def batch_predict_volatility(ipo_ids: List[int], db: Session = Depends(get_db), current_user=Depends(get_current_user)):
     """Predict volatility for multiple IPOs at once"""
     if not predictor:
         raise HTTPException(status_code=503, detail="ML Predictor is not currently available.")

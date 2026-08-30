@@ -19,12 +19,14 @@ import pandas as pd
 import io
 from fastapi import UploadFile, File
 from app.services.ipo_analyzer import analyze_ipo
+from app.api.routes.auth import get_current_user
+from app.core.security import require_admin
 
 router = APIRouter(prefix="/ipos", tags=["IPOs"])
 
 
 @router.post("/sync", tags=["IPOs"])
-async def sync_ipo_data(db: Session = Depends(get_db)):
+async def sync_ipo_data(db: Session = Depends(get_db), current_user=Depends(require_admin)):
     """
     Trigger a manual sync of real-time Indian IPO data.
     Scrapes from IPO Central (listings + GMP) and Moneycontrol (detail pages).
@@ -49,7 +51,8 @@ async def sync_ipo_data(db: Session = Depends(get_db)):
 @router.post("/bulk-import", tags=["IPOs"])
 async def bulk_import_ipos(
     file: UploadFile = File(...),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user=Depends(require_admin),
 ):
     """
     Import IPOs from CSV or Excel files.
@@ -135,7 +138,8 @@ def get_ipo_analysis(ipo_id: int, db: Session = Depends(get_db)):
 @router.post("/", response_model=IPOResponse, status_code=status.HTTP_201_CREATED)
 def create_ipo(
     ipo_data: IPOCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
 ):
     """
     Create a new IPO entry.
@@ -324,7 +328,8 @@ def get_ipo_by_symbol(
 def update_ipo(
     ipo_id: int,
     ipo_data: IPOUpdate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
 ):
     """
     Update an existing IPO. Only provided fields will be updated.
@@ -346,7 +351,8 @@ def update_ipo(
 @router.delete("/{ipo_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_ipo(
     ipo_id: int,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user=Depends(require_admin),
 ):
     """
     Delete an IPO by ID.

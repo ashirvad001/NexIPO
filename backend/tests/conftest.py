@@ -190,3 +190,33 @@ def listed_ipo(create_test_ipo):
         listing_price=145.0,
         listing_date=datetime.now() - timedelta(days=30),
     )
+
+
+@pytest.fixture()
+def admin_user(create_test_user):
+    """A pre-created admin user."""
+    return create_test_user(
+        email="admin@example.com",
+        username="adminuser",
+        password="AdminPassword123",
+        full_name="Admin User",
+    )
+
+
+@pytest.fixture(autouse=False)
+def _set_admin_role(admin_user, db_session):
+    """Promote admin_user to admin role (runs after creation)."""
+    admin_user.role = "admin"
+    db_session.commit()
+    db_session.refresh(admin_user)
+    return admin_user
+
+
+@pytest.fixture()
+def admin_auth_headers(_set_admin_role):
+    """Provide Authorization headers with a valid JWT for the admin user."""
+    admin_user = _set_admin_role
+    token = AuthService.create_access_token(
+        {"sub": str(admin_user.id), "email": admin_user.email}
+    )
+    return {"Authorization": f"Bearer {token}"}

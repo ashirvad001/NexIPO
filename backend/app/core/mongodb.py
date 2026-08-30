@@ -17,7 +17,7 @@ class MongoDB:
         """Connect to MongoDB"""
         cls.client = AsyncIOMotorClient(settings.MONGODB_URL)
         cls.sync_client = MongoClient(settings.MONGODB_URL)
-        print(f"✅ Connected to MongoDB: {settings.MONGODB_DB}")
+        print(f"Successfully Connected to MongoDB: {settings.MONGODB_DB}")
     
     @classmethod
     def close(cls):

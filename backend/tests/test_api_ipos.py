@@ -14,7 +14,7 @@ import pytest
 class TestCreateIPO:
     """Tests for POST /api/v1/ipos/"""
 
-    def test_create_ipo(self, client):
+    def test_create_ipo(self, client, auth_headers):
         """Create a new IPO and verify 201 response."""
         response = client.post("/api/v1/ipos/", json={
             "company_name": "New Tech Ltd",
@@ -25,41 +25,41 @@ class TestCreateIPO:
             "price_band_upper": 120.0,
             "issue_size_rs_cr": 300.0,
             "lot_size": 50,
-        })
+        }, headers=auth_headers)
         assert response.status_code == 201
         data = response.json()
         assert data["company_name"] == "New Tech Ltd"
         assert data["symbol"] == "NEWTECH"
         assert data["id"] is not None
 
-    def test_create_ipo_duplicate_symbol(self, client, test_ipo):
+    def test_create_ipo_duplicate_symbol(self, client, test_ipo, auth_headers):
         """Reject IPO creation when symbol already exists."""
         response = client.post("/api/v1/ipos/", json={
             "company_name": "Another Corp",
             "symbol": "TESTCORP",  # same as test_ipo
             "status": "upcoming",
             "ipo_type": "mainboard",
-        })
+        }, headers=auth_headers)
         assert response.status_code == 400
         assert "already exists" in response.json()["detail"].lower()
 
-    def test_create_ipo_minimal(self, client):
+    def test_create_ipo_minimal(self, client, auth_headers):
         """Create IPO with only required fields."""
         response = client.post("/api/v1/ipos/", json={
             "company_name": "Minimal Corp",
-        })
+        }, headers=auth_headers)
         assert response.status_code == 201
         data = response.json()
         assert data["company_name"] == "Minimal Corp"
         assert data["status"] == "upcoming"  # default
 
-    def test_create_ipo_invalid_price_band(self, client):
+    def test_create_ipo_invalid_price_band(self, client, auth_headers):
         """Reject when upper price band < lower price band."""
         response = client.post("/api/v1/ipos/", json={
             "company_name": "Bad Corp",
             "price_band_lower": 200.0,
             "price_band_upper": 100.0,
-        })
+        }, headers=auth_headers)
         assert response.status_code == 422
 
 
@@ -143,40 +143,40 @@ class TestGetSingleIPO:
 class TestUpdateIPO:
     """Tests for PUT /api/v1/ipos/{ipo_id}"""
 
-    def test_update_ipo(self, client, test_ipo):
+    def test_update_ipo(self, client, test_ipo, auth_headers):
         """Partial update of an IPO."""
         response = client.put(f"/api/v1/ipos/{test_ipo.id}", json={
             "status": "open",
             "issue_size_rs_cr": 750.0,
-        })
+        }, headers=auth_headers)
         assert response.status_code == 200
         data = response.json()
         assert data["status"] == "open"
         assert data["issue_size_rs_cr"] == 750.0
 
-    def test_update_ipo_not_found(self, client):
+    def test_update_ipo_not_found(self, client, auth_headers):
         """404 when updating non-existent IPO."""
         response = client.put("/api/v1/ipos/99999", json={
             "status": "closed",
-        })
+        }, headers=auth_headers)
         assert response.status_code == 404
 
 
 class TestDeleteIPO:
     """Tests for DELETE /api/v1/ipos/{ipo_id}"""
 
-    def test_delete_ipo(self, client, test_ipo):
+    def test_delete_ipo(self, client, test_ipo, admin_auth_headers):
         """Delete an IPO and verify 204."""
-        response = client.delete(f"/api/v1/ipos/{test_ipo.id}")
+        response = client.delete(f"/api/v1/ipos/{test_ipo.id}", headers=admin_auth_headers)
         assert response.status_code == 204
 
         # Verify it's gone
         response = client.get(f"/api/v1/ipos/{test_ipo.id}")
         assert response.status_code == 404
 
-    def test_delete_ipo_not_found(self, client):
+    def test_delete_ipo_not_found(self, client, admin_auth_headers):
         """404 when deleting non-existent IPO."""
-        response = client.delete("/api/v1/ipos/99999")
+        response = client.delete("/api/v1/ipos/99999", headers=admin_auth_headers)
         assert response.status_code == 404
 
 
@@ -198,3 +198,42 @@ class TestSpecializedQueries:
         assert response.status_code == 200
         data = response.json()
         assert isinstance(data, list)
+
+
+class TestIPOAuthEnforcement:
+    """Tests that protected IPO endpoints reject unauthenticated requests."""
+
+    def test_create_ipo_requires_auth(self, client):
+        """POST /ipos/ returns 401 without token."""
+        response = client.post("/api/v1/ipos/", json={"company_name": "Unauthed Corp"})
+        assert response.status_code == 401
+
+    def test_update_ipo_requires_auth(self, client, test_ipo):
+        """PUT /ipos/{id} returns 401 without token."""
+        response = client.put(f"/api/v1/ipos/{test_ipo.id}", json={"status": "open"})
+        assert response.status_code == 401
+
+    def test_delete_ipo_requires_auth(self, client, test_ipo):
+        """DELETE /ipos/{id} returns 401 without token."""
+        response = client.delete(f"/api/v1/ipos/{test_ipo.id}")
+        assert response.status_code == 401
+
+    def test_delete_ipo_requires_admin(self, client, test_ipo, auth_headers):
+        """DELETE /ipos/{id} returns 403 for non-admin users."""
+        response = client.delete(f"/api/v1/ipos/{test_ipo.id}", headers=auth_headers)
+        assert response.status_code == 403
+
+    def test_sync_requires_auth(self, client):
+        """POST /ipos/sync returns 401 without token."""
+        response = client.post("/api/v1/ipos/sync")
+        assert response.status_code == 401
+
+    def test_sync_requires_admin(self, client, auth_headers):
+        """POST /ipos/sync returns 403 for non-admin users."""
+        response = client.post("/api/v1/ipos/sync", headers=auth_headers)
+        assert response.status_code == 403
+
+    def test_bulk_import_requires_auth(self, client):
+        """POST /ipos/bulk-import returns 401 without token."""
+        response = client.post("/api/v1/ipos/bulk-import")
+        assert response.status_code == 401

@@ -106,3 +106,29 @@ def validate_secret_key(secret_key: str, debug: bool) -> None:
         if not debug:
             raise RuntimeError(msg)
         logger.warning(msg)
+
+
+# ── Role-Based Access Control ─────────────────────────────────────────────
+
+from fastapi import Depends, HTTPException, status  # noqa: E402
+
+
+def _get_current_user_dependency():
+    """Lazy import to avoid circular dependency with auth routes."""
+    from app.api.routes.auth import get_current_user
+    return get_current_user
+
+
+def require_admin(current_user=Depends(_get_current_user_dependency())):
+    """
+    Dependency that enforces admin-level access.
+
+    Raises HTTPException(403) if the authenticated user does not have
+    the 'admin' role. Returns the user object otherwise.
+    """
+    if current_user.role != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin access required",
+        )
+    return current_user
