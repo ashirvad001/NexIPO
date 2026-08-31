@@ -85,12 +85,24 @@ class FeatureExtractor:
         custom_features.update(section_features)
         custom_features.update(financial_features)
         
-        custom_feature_array = np.array(list(custom_features.values())).reshape(1, -1)
+        custom_feature_values = []
+        for v in custom_features.values():
+            if v is None:
+                custom_feature_values.append(0.0)
+            else:
+                try:
+                    val = float(v)
+                    custom_feature_values.append(0.0 if (np.isnan(val) or np.isinf(val)) else val)
+                except Exception:
+                    custom_feature_values.append(0.0)
+        
+        custom_feature_array = np.array(custom_feature_values, dtype=np.float64).reshape(1, -1)
         
         if tfidf_features.ndim == 1:
             tfidf_features = tfidf_features.reshape(1, -1)
         
-        return np.hstack([tfidf_features, custom_feature_array])
+        combined = np.hstack([tfidf_features, custom_feature_array])
+        return np.nan_to_num(combined, nan=0.0, posinf=1e5, neginf=-1e5)
     
     def fit_transform(self, texts: List[str], risk_indicators_list: List[Dict],
                      sections_list: List[Dict], ipo_data_list: List[Dict]) -> Tuple[np.ndarray, List[str]]:
@@ -107,7 +119,9 @@ class FeatureExtractor:
             all_features.append(combined.flatten())
         
         feature_matrix = np.vstack(all_features)
+        feature_matrix = np.nan_to_num(feature_matrix, nan=0.0, posinf=1e5, neginf=-1e5)
         feature_matrix = self.scaler.fit_transform(feature_matrix)
+        feature_matrix = np.nan_to_num(feature_matrix, nan=0.0, posinf=1e5, neginf=-1e5)
         
         self.is_fitted = True
         
@@ -130,8 +144,13 @@ class FeatureExtractor:
         risk_indicators: Dict
     ) -> np.ndarray:
         """Extract features for single prediction"""
-        # For single prediction without fitting, use simple feature extraction
-        tfidf_features = np.zeros(self.max_features)
+        if self.is_fitted:
+            try:
+                tfidf_features = self.extract_tfidf_features([processed_text], fit=False)[0]
+            except Exception:
+                tfidf_features = np.zeros(self.max_features)
+        else:
+            tfidf_features = np.zeros(self.max_features)
         
         risk_feats = self.extract_risk_features(risk_indicators)
         read_feats = self.extract_readability_features(processed_text)
@@ -143,7 +162,13 @@ class FeatureExtractor:
     
     def get_feature_names(self) -> List[str]:
         """Get list of feature names"""
-        tfidf_names = [f'tfidf_{i}' for i in range(self.max_features)]
+        if self.is_fitted and hasattr(self.tfidf_vectorizer, "get_feature_names_out"):
+            try:
+                tfidf_names = [f'tfidf_{name}' for name in self.tfidf_vectorizer.get_feature_names_out()]
+            except Exception:
+                tfidf_names = [f'tfidf_{i}' for i in range(self.max_features)]
+        else:
+            tfidf_names = [f'tfidf_{i}' for i in range(self.max_features)]
         custom_names = (
             list(self.extract_risk_features({}).keys()) +
             list(self.extract_readability_features('').keys()) +
@@ -166,3 +191,25 @@ class FeatureExtractor:
         combined = self.scaler.transform(combined)
         
         return combined.flatten()
+
+    def save(self, filepath: str):
+        import joblib, os
+        os.makedirs(os.path.dirname(os.path.abspath(filepath)), exist_ok=True)
+        joblib.dump({
+            'tfidf_vectorizer': self.tfidf_vectorizer,
+            'scaler': self.scaler,
+            'is_fitted': self.is_fitted,
+            'max_features': self.max_features,
+            'ngram_range': self.ngram_range
+        }, filepath)
+
+    def load(self, filepath: str):
+        import joblib, os
+        if os.path.exists(filepath):
+            data = joblib.load(filepath)
+            self.tfidf_vectorizer = data.get('tfidf_vectorizer', self.tfidf_vectorizer)
+            self.scaler = data.get('scaler', self.scaler)
+            self.is_fitted = data.get('is_fitted', False)
+            self.max_features = data.get('max_features', self.max_features)
+            self.ngram_range = data.get('ngram_range', self.ngram_range)
+        return self

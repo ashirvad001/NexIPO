@@ -12,14 +12,21 @@
 ## 🔧 Window 1: Backend Setup & Run
 
 ```powershell
+# First, start the local PostgreSQL database
+cd "C:\Users\singh\Desktop\Project\Main 2\ipo-intelligence-platform"
+docker-compose -f docker-compose.dev.yml up -d postgres
+
 # Navigate to backend directory
-cd "C:\Users\singh\Desktop\Project\Main 2\ipo-intelligence-platform\backend"
+cd backend
 
 # Install dependencies (first time only)
 pip install -r requirements.txt
 
 # Create environment file (first time only)
 copy .env.example .env
+
+# Run database migrations to create the schema (required)
+alembic upgrade head
 
 # Seed database with sample data (first time only)
 python scripts/seed_data.py
@@ -84,8 +91,9 @@ pip install -r requirements.txt
 
 **Error: Database connection failed**
 ```powershell
-# Check .env file exists
-# Default uses SQLite, no setup needed
+# Ensure Postgres container is running via Docker Compose
+cd "C:\Users\singh\Desktop\Project\Main 2\ipo-intelligence-platform"
+docker-compose -f docker-compose.dev.yml up -d postgres
 ```
 
 **Error: Port 8000 already in use**
@@ -166,6 +174,57 @@ Press `Ctrl + C` in each PowerShell window to stop the servers.
 - Backend must start before frontend for data to load
 - First `npm install` takes 2-3 minutes
 - Subsequent starts are much faster
+
+---
+
+## 🤖 ML Model Training & Deployment
+
+### Train the Risk Prediction Model
+
+The ML pipeline uses TF-IDF + Logistic Regression on historical Indian IPO listing data to predict risk categories (`low`, `medium`, `high`).
+
+```powershell
+# Navigate to backend directory
+cd "C:\Users\singh\Desktop\Project\Main 2\NexIPO\backend"
+
+# Train the model (uses backend/data/indian_ipo_dataset.csv + PostgreSQL records)
+python scripts/train_model.py
+```
+
+This will:
+1. Load 611+ historical IPOs from `backend/data/indian_ipo_dataset.csv`
+2. Optionally incorporate records from the PostgreSQL `ipos` table
+3. Generate synthesized prospectus text for TF-IDF training
+4. Perform 5-fold stratified cross-validation
+5. Save model artifacts to `backend/models/risk_classifier.joblib` and `backend/models/risk_feature_extractor.joblib`
+
+### Using a Custom CSV Dataset
+
+Place your CSV file at `backend/data/indian_ipo_dataset.csv` with these columns:
+
+| Column | Description |
+|--------|-------------|
+| `Date` | Listing date |
+| `IPO_Name` | Company name |
+| `Issue_Size(crores)` | Issue size in crores |
+| `QIB` | QIB subscription multiplier |
+| `HNI` | HNI/NII subscription multiplier |
+| `RII` | Retail subscription multiplier |
+| `Total` | Total subscription multiplier |
+| `Offer Price` | Offer price per share |
+| `Listing Gain` | Listing day gain (%) |
+
+Then re-run `python scripts/train_model.py` to retrain.
+
+### Verify Model Endpoints
+
+After training, restart the backend and check:
+
+| Endpoint | Purpose |
+|----------|---------|
+| `GET /api/v1/ml/model-status` | Model readiness (`status: "ready"`) |
+| `GET /api/v1/ml/model/performance` | Accuracy, F1, precision, recall, CV scores |
+| `POST /api/v1/ml/predict-risk` | Direct text prediction (≥200 words for ML path) |
 
 ---
 

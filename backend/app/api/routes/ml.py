@@ -135,21 +135,50 @@ async def get_model_performance():
     Get ML model performance metrics
     
     Returns:
-        Training accuracy, F1 scores, etc.
+        Training accuracy, F1 scores, and validation metrics
     """
     predictor = get_predictor()
     
     if not predictor.classifier.is_fitted:
         return {
-            "message": "Model not trained yet",
-            "is_fitted": False
+            "message": "Model not trained yet. Run 'python scripts/train_model.py' to train.",
+            "is_fitted": False,
+            "status": "not_trained"
+        }
+    
+    metrics = getattr(predictor.classifier, "metrics", {})
+    if metrics:
+        # Return comprehensive performance summary
+        return {
+            "is_fitted": True,
+            "status": "ready",
+            "model_type": metrics.get("model_type", "TF-IDF + Logistic Regression"),
+            "performance": {
+                "test_accuracy": metrics.get("accuracy", metrics.get("test_accuracy")),
+                "test_precision": metrics.get("precision_macro", metrics.get("test_precision")),
+                "test_recall": metrics.get("recall_macro", metrics.get("test_recall")),
+                "test_f1": metrics.get("f1_score_macro", metrics.get("test_f1")),
+                "cv_f1_mean": metrics.get("cv_f1_mean"),
+                "cv_f1_std": metrics.get("cv_f1_std"),
+            },
+            "dataset": {
+                "total_samples": metrics.get("total_samples", metrics.get("sample_count")),
+                "training_samples": metrics.get("training_samples"),
+                "test_samples": metrics.get("test_samples"),
+                "feature_count": metrics.get("feature_count"),
+                "classes": metrics.get("classes", ["low", "medium", "high"]),
+            },
+            "trained_at": metrics.get("trained_at"),
+            "confusion_matrix": metrics.get("confusion_matrix"),
+            "class_report": metrics.get("class_report"),
         }
     
     return {
         "is_fitted": True,
-        "model_type": "Logistic Regression",
-        "feature_count": 1034,
-        "message": "Model performance metrics available after training"
+        "status": "ready",
+        "model_type": "TF-IDF + Logistic Regression",
+        "feature_count": len(predictor.feature_extractor.get_feature_names()),
+        "message": "Model is fitted but no detailed metrics were persisted. Re-train to see full metrics."
     }
 
 
@@ -198,11 +227,20 @@ async def get_model_status():
     """
     try:
         predictor = get_predictor()
+        metrics = getattr(predictor.classifier, "metrics", {}) or {}
+        feat_count = metrics.get(
+            "feature_count",
+            len(predictor.feature_extractor.get_feature_names())
+        )
         return {
             "status": "ready" if predictor.classifier.is_fitted else "not_trained",
             "is_fitted": predictor.classifier.is_fitted,
-            "model_type": "Logistic Regression",
-            "feature_count": 1034
+            "model_type": metrics.get("model_type", "TF-IDF + Logistic Regression"),
+            "feature_count": feat_count,
+            "total_samples": metrics.get("total_samples", metrics.get("sample_count")),
+            "test_f1": metrics.get("f1_score_macro", metrics.get("test_f1")),
+            "cv_f1_mean": metrics.get("cv_f1_mean"),
+            "trained_at": metrics.get("trained_at"),
         }
     except Exception as e:
         return {

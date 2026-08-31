@@ -13,9 +13,18 @@ from app.models.ipo import IPO, IPOStatus
 from main import app
 from app.ml_service.volatility.volatility_predictor import VolatilityForecaster
 
-# Create a test database
-SQLALCHEMY_DATABASE_URL = "sqlite:///./test_volatility.db"
-engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
+from app.core.config import get_settings
+
+settings = get_settings()
+
+engine = create_engine(
+    settings.TEST_DATABASE_URL,
+    pool_size=settings.DB_POOL_SIZE,
+    max_overflow=settings.DB_MAX_OVERFLOW,
+    pool_timeout=settings.DB_POOL_TIMEOUT,
+    pool_recycle=settings.DB_POOL_RECYCLE,
+    pool_pre_ping=True
+)
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 def override_get_db():

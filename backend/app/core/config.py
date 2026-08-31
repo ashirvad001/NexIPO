@@ -13,8 +13,12 @@ class Settings(BaseSettings):
     DEBUG: bool = False
     
     # Database
-    DATABASE_URL: str
-    TEST_DATABASE_URL: str | None = None
+    DATABASE_URL: str = "postgresql+psycopg://ipo_user:ipo_password@localhost:5432/ipo_platform"
+    TEST_DATABASE_URL: str | None = "postgresql+psycopg://ipo_user:ipo_password@localhost:5432/ipo_test_db"
+    DB_POOL_SIZE: int = 10
+    DB_MAX_OVERFLOW: int = 20
+    DB_POOL_TIMEOUT: int = 30
+    DB_POOL_RECYCLE: int = 1800
     
     # Redis
     REDIS_URL: str = "redis://localhost:6379/0"

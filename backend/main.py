@@ -120,8 +120,10 @@ async def lifespan(app: FastAPI):
     
     # Initialize database
     try:
-        Base.metadata.create_all(bind=engine)
-        logger.info("Database initialized successfully")
+        # We no longer use Base.metadata.create_all(bind=engine)
+        # Database schema is now managed by Alembic. 
+        # Run `alembic upgrade head` before starting the application.
+        logger.info("Database schema should be initialized via Alembic.")
     except Exception as e:
         logger.error(f"Database initialization failed: {e}")
         raise
@@ -137,14 +139,14 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         logger.warning(f"ML model loading warning: {e}")
     
-    # Start background IPO sync
-    sync_task = asyncio.create_task(_background_ipo_sync())
-    logger.info("Background IPO sync started")
+    # Start background IPO sync (DISABLED for local SQLite to prevent locks)
+    # sync_task = asyncio.create_task(_background_ipo_sync())
+    # logger.info("Background IPO sync started")
     
     yield
     
     # Shutdown
-    sync_task.cancel()
+    # sync_task.cancel()
     logger.info("Shutting down NexIPO...")
 
 
@@ -293,7 +295,7 @@ async def deep_health_check():
         try:
             from sqlalchemy import text
             db.execute(text("SELECT 1"))
-            checks["database"] = {"status": "ok", "type": "sqlite"}
+            checks["database"] = {"status": "ok", "type": "postgres"}
         finally:
             db.close()
     except Exception as e:

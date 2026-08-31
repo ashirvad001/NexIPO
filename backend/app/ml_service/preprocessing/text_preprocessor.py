@@ -9,18 +9,12 @@ import logging
 logger = logging.getLogger(__name__)
 
 # Download NLTK data
-try:
-    nltk.data.find('tokenizers/punkt')
-except LookupError:
-    nltk.download('punkt', quiet=True)
-try:
-    nltk.data.find('corpora/stopwords')
-except LookupError:
-    nltk.download('stopwords', quiet=True)
-try:
-    nltk.data.find('corpora/wordnet')
-except LookupError:
-    nltk.download('wordnet', quiet=True)
+for resource in ['tokenizers/punkt', 'tokenizers/punkt_tab', 'corpora/stopwords', 'corpora/wordnet']:
+    try:
+        nltk.data.find(resource)
+    except LookupError:
+        name = resource.split('/')[-1]
+        nltk.download(name, quiet=True)
 
 
 class TextPreprocessor:
@@ -48,7 +42,11 @@ class TextPreprocessor:
         text = re.sub(r'[^a-z\s]', ' ', text)
         text = re.sub(r'\s+', ' ', text).strip()
         
-        tokens = word_tokenize(text)
+        try:
+            tokens = word_tokenize(text)
+        except Exception:
+            tokens = text.split()
+            
         tokens = [self.lemmatizer.lemmatize(t) for t in tokens if t not in self.stop_words and len(t) > 2]
         
         return ' '.join(tokens) if return_string else tokens

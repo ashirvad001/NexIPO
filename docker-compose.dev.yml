@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database for Development and Testing
+  postgres:
+    image: postgres:16-alpine
+    container_name: ipo_postgres_dev
+    environment:
+      POSTGRES_USER: ipo_user
+      POSTGRES_PASSWORD: ipo_password
+      POSTGRES_DB: ipo_platform
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ipo_user -d ipo_platform"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ipo_network_dev
+
+volumes:
+  postgres_dev_data:
+    driver: local
+
+networks:
+  ipo_network_dev:
+    driver: bridge

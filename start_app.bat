@@ -79,23 +79,8 @@ if %errorlevel% neq 0 (
 )
 echo.
 
-REM ── Step 1: Start Databases (Docker) ──
-echo  [STEP 1/3] Starting Database Services (PostgreSQL, Redis, MongoDB)...
-docker compose version >nul 2>&1
-if %errorlevel% equ 0 (
-    echo           Starting containers in background...
-    cd /d "%ROOT%" && docker compose up -d postgres redis mongodb
-) else (
-    docker-compose version >nul 2>&1
-    if %errorlevel% equ 0 (
-        echo           Starting containers in background...
-        cd /d "%ROOT%" && docker-compose up -d postgres redis mongodb
-    ) else (
-        echo  [WARNING] Docker compose not found. Skipping databases.
-    )
-)
-echo           Waiting for databases to initialize (approx 5s)...
-timeout /t 5 /nobreak >nul
+REM ── Step 1: Initialize Database ──
+echo  [STEP 1/3] Using local SQLite database (no Docker required)...
 echo.
 
 REM ── Step 2: Start Backend ──

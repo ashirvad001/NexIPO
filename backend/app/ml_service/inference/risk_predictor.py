@@ -24,6 +24,7 @@ from app.ml_service.preprocessing.text_preprocessor import TextPreprocessor
 from app.ml_service.feature_engineering.feature_extractor import FeatureExtractor
 from app.ml_service.models.risk_classifier import RiskClassifier
 from app.ml_service.inference.explainer import Explainer
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
@@ -359,11 +360,12 @@ def _score_to_category(score: float) -> str:
 class RiskPredictor:
     """End-to-end IPO risk prediction pipeline."""
 
-    def __init__(self):
+    def __init__(self, model_path: Optional[str] = None):
         self.preprocessor = TextPreprocessor()
         self.feature_extractor = FeatureExtractor()
         self.classifier = RiskClassifier()
         self.explainer = Explainer(self.classifier, self.feature_extractor)
+        self.load_model(model_path)
 
     # ------------------------------------------------------------------
     # Public API
@@ -584,12 +586,34 @@ class RiskPredictor:
     # Model persistence
     # ------------------------------------------------------------------
 
-    def load_model(self, filepath: str) -> "RiskPredictor":
-        self.classifier.load(filepath)
+    def load_model(self, filepath: Optional[str] = None) -> "RiskPredictor":
+        paths_to_try = []
+        if filepath:
+            paths_to_try.append(Path(filepath))
+        else:
+            paths_to_try.extend([
+                Path("models/risk_classifier.joblib"),
+                Path(__file__).resolve().parent.parent.parent.parent / "models" / "risk_classifier.joblib",
+                Path(__file__).resolve().parent.parent.parent / "models" / "risk_classifier.joblib",
+            ])
+
+        for p in paths_to_try:
+            if p.exists():
+                try:
+                    self.classifier.load(str(p))
+                    logger.info("Loaded RiskClassifier from %s (is_fitted=%s)", p, self.classifier.is_fitted)
+                    feat_p = p.parent / "risk_feature_extractor.joblib"
+                    if feat_p.exists():
+                        self.feature_extractor.load(str(feat_p))
+                    break
+                except Exception as e:
+                    logger.warning("Failed loading model from %s: %s", p, e)
         return self
 
     def save_model(self, filepath: str) -> "RiskPredictor":
         self.classifier.save(filepath)
+        feat_p = Path(filepath).parent / "risk_feature_extractor.joblib"
+        self.feature_extractor.save(str(feat_p))
         return self
 
 

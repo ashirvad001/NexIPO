@@ -2,7 +2,7 @@
 Shared pytest fixtures for NexIPO backend tests.
 
 Provides:
-- In-memory SQLite test database (fast, isolated)
+- PostgreSQL test database
 - FastAPI TestClient with dependency overrides
 - Factory fixtures for creating test users, IPOs, auth headers
 """
@@ -20,14 +20,19 @@ from app.models.user import User
 from app.services.auth_service import AuthService
 
 
-# ── In-memory SQLite engine (shared across a test session) ─────────────────
+# ── PostgreSQL engine for testing ─────────────────────────────────────────
 
-SQLALCHEMY_DATABASE_URL = "sqlite://"  # in-memory
+from app.core.config import get_settings
+
+settings = get_settings()
 
 engine = create_engine(
-    SQLALCHEMY_DATABASE_URL,
-    connect_args={"check_same_thread": False},
-    poolclass=StaticPool,  # required for in-memory SQLite across threads
+    settings.TEST_DATABASE_URL,
+    pool_size=settings.DB_POOL_SIZE,
+    max_overflow=settings.DB_MAX_OVERFLOW,
+    pool_timeout=settings.DB_POOL_TIMEOUT,
+    pool_recycle=settings.DB_POOL_RECYCLE,
+    pool_pre_ping=True
 )
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
