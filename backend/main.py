@@ -22,7 +22,7 @@ from app.core.security import (
 )
 from app.core.logging_config import setup_logging
 from app.db.database import Base, engine
-from app.api.routes import ipos, files, ml, auth, volatility, allotment
+from app.api.routes import ipos, files, ml, auth, volatility, allotment, model_accuracy
 from app.api import websockets
 
 settings = get_settings()
@@ -383,6 +383,7 @@ app.include_router(auth.router, prefix=settings.API_V1_PREFIX)
 app.include_router(websockets.router, prefix=settings.API_V1_PREFIX)
 app.include_router(volatility.router, prefix=settings.API_V1_PREFIX)
 app.include_router(allotment.router, prefix=settings.API_V1_PREFIX)
+app.include_router(model_accuracy.router, prefix=settings.API_V1_PREFIX)
 logger.info("All routers included")
 
 @app.get("/inspect_routes")

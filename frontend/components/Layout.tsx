@@ -45,6 +45,11 @@ const Layout: React.FC<LayoutProps> = ({
         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg>
       )
     },
+    {
+      label: 'AI Track Record', href: '/model-accuracy', icon: (
+        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+      )
+    },
   ];
 
   const handleAuthClick = (view: 'login' | 'signup') => {

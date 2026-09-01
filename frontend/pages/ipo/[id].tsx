@@ -532,6 +532,23 @@ export default function IPODetailPage() {
           hasProspectusInitially={!!ipo.prospectus_file_id}
         />
 
+        {/* ═══ AI TRACK RECORD CTA ═══ */}
+        <a
+          href="/model-accuracy"
+          className="group flex items-center justify-between gap-4 mt-6 sm:mt-8 px-5 py-4 rounded-xl bg-gradient-to-r from-primary-50 to-indigo-50 border border-primary-200 hover:border-primary-400 hover:shadow-md transition-all"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-primary-100 flex items-center justify-center flex-shrink-0">
+              <svg className="w-5 h-5 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-navy-900">See our AI track record</p>
+              <p className="text-xs text-navy-500">Compare predicted vs actual listing gains across all IPOs</p>
+            </div>
+          </div>
+          <svg className="w-5 h-5 text-navy-400 group-hover:text-primary-600 group-hover:translate-x-0.5 transition-all flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+        </a>
+
         {/* Footer */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mt-6 sm:mt-8">
           <button

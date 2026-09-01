@@ -21,6 +21,7 @@ from app.db.database import Base
 from app.models.ipo import IPO           # noqa: F401
 from app.models.user import User         # noqa: F401
 from app.models.gmp_history import GMPHistory  # noqa: F401
+from app.models.prediction_log import PredictionLog  # noqa: F401
 
 target_metadata = Base.metadata
 

@@ -253,6 +253,22 @@ export const apiService = {
     const response = await apiClient.get(`/allotment/compare/${ipoId}`);
     return response.data;
   },
+
+  // Model Accuracy / Track Record endpoints
+  async getModelAccuracy(params?: {
+    sort_by?: string;
+    sort_order?: string;
+    ipo_type?: string;
+    search?: string;
+  }) {
+    const response = await apiClient.get('/model-accuracy', { params });
+    return response.data;
+  },
+
+  async getModelAccuracySummary() {
+    const response = await apiClient.get('/model-accuracy/summary');
+    return response.data;
+  },
 };
 
 export default apiService;

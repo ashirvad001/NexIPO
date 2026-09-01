@@ -76,6 +76,19 @@ async def predict_ipo_volatility(
         ipo.risk_category = result.get('risk_level')
         ipo.ml_processed = True
         ipo.ml_processed_at = datetime.now()
+        
+        # Persist prediction for accuracy tracking
+        from app.models.prediction_log import PredictionLog
+        predicted_gain = result.get('predicted_volatility_percentage')
+        if predicted_gain is not None:
+            log_entry = PredictionLog(
+                ipo_id=ipo.id,
+                predicted_gain=predicted_gain,
+                predicted_at=datetime.now(),
+                model_version="bert-lstm-v1",
+            )
+            db.add(log_entry)
+        
         db.commit()
         
         return result
